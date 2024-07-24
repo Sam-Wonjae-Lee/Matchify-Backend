@@ -85,5 +85,21 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
 
+    // sends friend request
+    async send_friend_request(senderID: number, receiverID: number) {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("INSERT INTO friendrequest VALUES ($1, $2) RETURNING *", [senderID, receiverID]);
+            console.log(res.rows);
+        return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
+
 
 }
