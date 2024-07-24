@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { BlockerModule } from './use_case/blocker/blocker.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
-  imports: [],
+  imports: [BlockerModule, DatabaseModule],
   controllers: [AppController],
   providers: [AppService],
 })
