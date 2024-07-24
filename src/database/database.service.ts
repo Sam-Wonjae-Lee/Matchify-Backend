@@ -52,4 +52,22 @@ export class DatabaseService implements OnModuleDestroy {
             client.release();
         }
     }
+
+    // message use case
+    async addMessage(messageID: number, userID: number, threadID: number, content: string) {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("INSERT INTO message VALUES ($1, $2, $3, $4, NOW()) RETURNING *", [messageID, userID, threadID, content]);
+            console.log(res.rows);
+        return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
+
+
 }
