@@ -1,9 +1,9 @@
 import { IsInt } from 'class-validator';
 
-export class AddFriendDto {
+export class SendFriendRequestDto {
     @IsInt()
-    readonly userID: number;
+    readonly senderID: number;
     
     @IsInt()
-    readonly friendID: number;
+    readonly receiverID: number;
 }

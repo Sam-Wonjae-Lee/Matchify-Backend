@@ -101,5 +101,20 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
 
+    async unsend_friend_request(senderID: number, receiverID: number) {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("DELETE FROM friendrequest WHERE senderID = $1 AND receiverID = $2 RETURNING *", [senderID, receiverID]);
+            console.log(res.rows);
+        return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
+
 
 }
