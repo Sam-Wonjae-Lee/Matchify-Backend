@@ -9,4 +9,10 @@ export class SpotifyController {
   async getUserInfo(@Param('id') id: string) {
     return this.spotifyService.getUserInfo(id);
   }
+
+  @Get('user/:id/playlists')
+  async getUserPlaylist(@Param('id') id: string) {
+    return this.spotifyService.getUserPlaylists(id);
+  }
+
 }

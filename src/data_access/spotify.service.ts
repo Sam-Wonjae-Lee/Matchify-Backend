@@ -45,4 +45,20 @@ export class SpotifyService {
 
     return response.json();
   }
+
+  public async getUserPlaylists(userId: string): Promise<any> {
+    const accessToken = await this.getAccessToken();
+
+    const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+        throw new HttpException('Failed to retrieve playlist info', response.status);
+    }
+  
+    return response.json();
+  }
 }
