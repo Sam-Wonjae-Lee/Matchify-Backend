@@ -14,5 +14,4 @@ export class SpotifyController {
   async getUserPlaylist(@Param('id') id: string) {
     return this.spotifyService.getUserPlaylists(id);
   }
-
 }
