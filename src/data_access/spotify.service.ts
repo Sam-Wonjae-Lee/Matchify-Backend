@@ -52,6 +52,12 @@ export class SpotifyService {
     return authURL;
   }
 
+  /**
+   * Get the user's profile. In other words, get detailed profile information about the user.
+   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile
+   * @param userId A string containing the Spotify user ID.
+   * @returns A JSONObject containing the response data for the Spotify user.
+   */
   public async getUserInfo(userId: string): Promise<any> {
     const accessToken = await this.getAccessToken();
 
@@ -68,6 +74,13 @@ export class SpotifyService {
     return response.json();
   }
 
+  /**
+   * Get the user's playlist information. This consists information from the playlist like images, playlist id, etc.
+   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-list-users-playlists
+   *
+   * @param userId A string containing the Spotify user ID.
+   * @return A JSONObject containing the response data for the user's playlist.
+   * */
   public async getUserPlaylists(userId: string): Promise<any> {
     const accessToken = await this.getAccessToken();
 
@@ -84,5 +97,35 @@ export class SpotifyService {
     return response.json();
   }
 
+  public async getPlaylistItems(playlistId: string): Promise<any> {
+    const accessToken = await this.getAccessToken();
 
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+    if (!response.ok) {
+        throw new HttpException('Failed to retrieve playlist info', response.status);
+    }
+
+    return response.json();
+  }
+
+  public async getTrackAudioFeatures(trackId: string): Promise<any> {
+    const accessToken = await this.getAccessToken();
+
+    const response = await fetch(`https://api.spotify.com/v1/audio-features/${trackId}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+    if (!response.ok) {
+        throw new HttpException('Failed to retrieve playlist info', response.status);
+    }
+
+    return response.json();
+  }
+
+  
 }
