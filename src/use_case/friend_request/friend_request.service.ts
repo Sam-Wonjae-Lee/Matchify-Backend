@@ -13,7 +13,7 @@ export class FriendRequestService {
     }
 
     // removes friend request from the database
-    unsend_friend_request(sendFriendRequestDto: SendFriendRequestDto){
+    unsend_friend_request(sendFriendRequestDto: SendFriendRequestDto) {
         const {senderID, receiverID} = sendFriendRequestDto;
         this.databaseService.unsend_friend_request(senderID, receiverID);
     }

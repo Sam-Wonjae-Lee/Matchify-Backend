@@ -1,5 +1,7 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { Pool } from 'pg';
+import { Interface } from 'readline';
+
 
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
@@ -161,6 +163,38 @@ export class DatabaseService implements OnModuleDestroy {
             const res = await client.query("DELETE FROM friendrequest WHERE senderID = $1 AND receiverID = $2 RETURNING *", [senderID, receiverID]);
             console.log(res.rows);
         return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
+
+
+
+    // adds upcoming concert to the database
+    async update_concerts(concert_list: {
+        concert_id: string;
+        name: string;
+        location: string;
+        url: string;
+        date: string;
+        image: string;
+        venue: string;
+    }[]) {
+        const client = await this.pool.connect();
+        try {
+            for (let concert of concert_list) {
+                // const res = await client.query("INSERT INTO concerts VALUES ($1, $2, $3, $4, $5, $6) RETURNING *", [concert.concert_id, concert.name, concert.location, 
+                  // concert.url, concert.image, concert.venue, concert.date]);
+
+                console.log(concert);
+            }
+              // const res = await client.query("INSERT INTO concerts VALUES ($1, $2, $3, $4) RETURNING *", [concertID, concertName, concertDate, concertLocation]);
+              // console.log(res.rows);
+        // return res;
         } 
         catch (e) {
             console.log(e);
