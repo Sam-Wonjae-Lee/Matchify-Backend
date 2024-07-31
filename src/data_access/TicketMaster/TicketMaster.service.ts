@@ -80,6 +80,7 @@ export class TicketMasterService {
 
         // add upcoming concerts to the database
         this.databaseService.update_concerts(x);
+        this.databaseService.delete_old_concerts();
 
         return (data as ApiResponse)._embedded.events.map((event) => ({
             id: event.id,  // Include the id in the returned object
@@ -95,4 +96,5 @@ export class TicketMasterService {
             throw new Error('No events found.');
         }
 
-    }}
+    }
+}

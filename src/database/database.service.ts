@@ -187,8 +187,8 @@ export class DatabaseService implements OnModuleDestroy {
         const client = await this.pool.connect();
         try {
             for (let concert of concert_list) {
-                // const res = await client.query("INSERT INTO concerts VALUES ($1, $2, $3, $4, $5, $6) RETURNING *", [concert.concert_id, concert.name, concert.location, 
-                  // concert.url, concert.image, concert.venue, concert.date]);
+                const res = await client.query("INSERT INTO concerts VALUES ($1, $2, $3, $4, $5, $6, *7) RETURNING *", [concert.concert_id, concert.name, concert.location, 
+                  concert.url, concert.image, concert.venue, concert.date]);
 
                 console.log(concert);
             }
@@ -204,5 +204,20 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
 
+
+    // delete concerts with dates before the current
+    async delete_old_concerts() {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("DELETE FROM concerts WHERE date < NOW() RETURNING *");
+            return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
 
 }
