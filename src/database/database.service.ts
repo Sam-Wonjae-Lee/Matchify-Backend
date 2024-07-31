@@ -118,12 +118,12 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       const insertFriend = await client.query(
-        'INSERT INTO friendlist (receiver_id, sender_id) VALUES ($1, $2) RETURNING *',
+        'INSERT INTO friends (receiver_id, sender_id) VALUES ($1, $2) RETURNING *',
         [receiver_id, sender_id]
       );
       console.log(insertFriend.rows);
       const deleteRequest = await client.query(
-        'DELETE FROM inbox WHERE receiver_id = $1 AND sender_id = $2 RETURNING *',
+        'DELETE FROM friendrequest WHERE receiver_id = $1 AND sender_id = $2 RETURNING *',
         [receiver_id, sender_id]
       );
       console.log(deleteRequest.rows);
@@ -144,7 +144,7 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       const deleteRequest = await client.query(
-        'DELETE FROM inbox WHERE receiver_id = $1 AND sender_id = $2 RETURNING *',
+        'DELETE FROM friendrequest WHERE receiver_id = $1 AND sender_id = $2 RETURNING *',
         [receiver_id, sender_id]
       );
       console.log(deleteRequest.rows);
