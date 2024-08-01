@@ -1,6 +1,7 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { Pool } from 'pg';
-import { Interface } from 'readline';
+// import { escape } from 'querystring';
+// import { Interface } from 'readline';
 
 
 @Injectable()
@@ -173,25 +174,47 @@ export class DatabaseService implements OnModuleDestroy {
     }
 
 
+    private async _check_concert(concert_id: string): Promise<boolean> {
+      const client = await this.pool.connect();
+      try {
+        const res = await client.query<{ concert_count: number }>(
+          "SELECT COUNT(*) AS concert_count FROM concert WHERE concertid= $1;",
+          [concert_id]
+        );
+        return (res.rows[0].concert_count >= 1);
+      } catch (e) {
+        console.log(e);
+        throw e;
+      } finally {
+        client.release();
+      }
+    }
 
     // adds upcoming concert to the database
+    //  TODO: add genre, artists, etc.
     async update_concerts(concert_list: {
         concert_id: string;
         name: string;
         location: string;
         url: string;
-        date: string;
+        date: Date;
         image: string;
         venue: string;
     }[]) {
         const client = await this.pool.connect();
         try {
             for (let concert of concert_list) {
-                const res = await client.query("INSERT INTO concerts VALUES ($1, $2, $3, $4, $5, $6, *7) RETURNING *", [concert.concert_id, concert.name, concert.location, 
-                  concert.url, concert.image, concert.venue, concert.date]);
+                // check if concert already exists
+                if (await this._check_concert(concert.concert_id)) {
+                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", [concert.concert_id, concert.name, concert.location, 
+                    concert.url, concert.image, concert.venue, concert.date]);
+                    console.log(concert);
+                }
+                else {
+                  console.log("concert already exists");
+                }
 
-                console.log(concert);
-            }
+        }
               // const res = await client.query("INSERT INTO concerts VALUES ($1, $2, $3, $4) RETURNING *", [concertID, concertName, concertDate, concertLocation]);
               // console.log(res.rows);
         // return res;
@@ -209,7 +232,7 @@ export class DatabaseService implements OnModuleDestroy {
     async delete_old_concerts() {
         const client = await this.pool.connect();
         try {
-            const res = await client.query("DELETE FROM concerts WHERE date < NOW() RETURNING *");
+            const res = await client.query("DELETE FROM concert WHERE date < NOW() RETURNING *");
             return res;
         } 
         catch (e) {
