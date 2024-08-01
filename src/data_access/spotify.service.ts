@@ -16,7 +16,6 @@ export class SpotifyService {
    * Retrieves the access token. The access token is a string which contains the credentials and permissions that can be used to access resources.
    * The access token is valid for 1 hour. After that time, the token expires and you need to request a new one.
    * More info is located here: https://developer.spotify.com/documentation/web-api/concepts/access-token
-   *
    * @return Temporary access token in JSON Format
    */
 
@@ -77,7 +76,6 @@ export class SpotifyService {
   /**
    * Get the user's playlist information. This consists information from the playlist like images, playlist id, etc.
    * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-list-users-playlists
-   *
    * @param userId A string containing the Spotify user ID.
    * @return A JSONObject containing the response data for the user's playlist.
    * */
@@ -97,6 +95,12 @@ export class SpotifyService {
     return response.json();
   }
 
+  /**
+   * Get the tracks/items from a playlist. 
+   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
+   * @param userId A string containing the Spotify playlist ID.
+   * @return A JSONObject containing the response data for playlist.
+   * */
   public async getPlaylistItems(playlistId: string): Promise<any> {
     const accessToken = await this.getAccessToken();
 
@@ -112,6 +116,12 @@ export class SpotifyService {
     return response.json();
   }
 
+  /**
+   * Get the attributes values from a song. This consists information like acousticness, danceability, energy, etc.
+   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-audio-features
+   * @param userId A string containing the Spotify song ID.
+   * @return A JSONObject containing the response data for song attributes.
+   * */
   public async getTrackAudioFeatures(trackId: string): Promise<any> {
     const accessToken = await this.getAccessToken();
 
