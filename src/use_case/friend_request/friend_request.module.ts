@@ -4,8 +4,8 @@ import { FriendRequestService } from './friend_request.service';
 import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-    imports: [DatabaseModule],
-    controllers: [FriendRequestController],
-    providers: [FriendRequestService],
+  imports: [DatabaseModule],
+  controllers: [FriendRequestController],
+  providers: [FriendRequestService],
 })
 export class FriendRequestModule {}
