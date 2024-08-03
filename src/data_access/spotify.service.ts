@@ -1,4 +1,10 @@
-import { Injectable, HttpException } from '@nestjs/common';
+import { Injectable, HttpException, Redirect } from '@nestjs/common';
+
+export interface ProfileObject {
+  ok: boolean,
+  user_id: string,
+  username: string
+}
 
 @Injectable()
 export class SpotifyService {
@@ -39,15 +45,38 @@ export class SpotifyService {
     return data.access_token;
   }
 
+  public async authenticateCode(code: string) {
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',   // For creating resources
+      body: new URLSearchParams({
+        'grant_type': 'client_credentials',
+        'code': code,
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': 'Basic ' + (Buffer.from(this.clientID + ':' + this.clientSecret).toString('base64')),
+      },
+    });
+
+    if (!response.ok) {
+      throw new HttpException('Failed to retrieve access token', response.status);
+    }
+
+    const data = await response.json();
+    // TODO: STORE THE ACCESS TOKEN AND REFRESH TOKEN IN DATABASE
+    // AFTER THAT WE WANT TO RETURN A PROFILE OBJECT <ProfileObjecet> TO INITIALIZE THE PERSON'S PROFILE PAGE AND HOME PAGE
+    // WE NEED TO CHECK IF THE PERSON HAS MADE AN ACCOUNT WITH MATCHIFY BEFORE, IF NOT THEN MAKE <ProfileObject>'s ok to be false
+    console.log(data.access_token);
+    return {ok: true, user_id: "LOL", username: "POKPOK"};
+  }
+
   /**
    * Retrieves the URL for Spotify Authorization. The URL is used to gain access to the user's Spotify account and retrieve userID.
    * @returns URL for Spotify Authorization
    */
   public getAuthUrl(): string {
     const scope = 'user-read-private user-read-email'; // Permissions for authorization
-    const authURL = `https://accounts.spotify.com/authorize?client_id=${this.clientID}
-                      &redirect_uri=${encodeURIComponent(this.redirectURI)}&scope=${encodeURIComponent(scope)}
-                      &response_type=code`;
+    const authURL = `https://accounts.spotify.com/authorize?client_id=${this.clientID}&redirect_uri=${encodeURIComponent(this.redirectURI)}&scope=${encodeURIComponent(scope)}&response_type=code`;
     return authURL;
   }
 
