@@ -242,5 +242,34 @@ export class DatabaseService implements OnModuleDestroy {
             client.release();
         }
     }
+   
+    async add_thread(threadID: number, threadName: string) {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("INSERT INTO thread VALUES ($1, $2) RETURNING *", [threadID, threadName]);
+            console.log(res.rows);
+            return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
 
+    async remove_thread(threadID: number) {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("DELETE FROM thread WHERE threadID = $1 RETURNING *", [threadID]);
+            console.log(res.rows);
+            return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
 }
