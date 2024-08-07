@@ -9,11 +9,12 @@ import { DatabaseModule } from './database/database.module';
 import { MessageModule } from './use_case/message/message.module';
 import { FriendRequestModule } from './use_case/friend_request/friend_request.module';
 import { RequestDecisionModule } from './use_case/request_decision/request_decision.module';
+import { SettingsModule} from "./use_case/settings/settings.module";
 import { TicketMasterModule } from './data_access/TicketMaster/TicketMaster.module';
 
 
 @Module({
-  imports: [SpotifyModule, BlockerModule, MessageModule, DatabaseModule, FriendRequestModule, RequestDecisionModule, TicketMasterModule],
+  imports: [SpotifyModule, BlockerModule, MessageModule, DatabaseModule, FriendRequestModule, RequestDecisionModule, SettingsModule, TicketMasterModule],
   controllers: [AppController],
   providers: [AppService, ],
 })

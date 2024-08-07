@@ -148,16 +148,105 @@ export class DatabaseService implements OnModuleDestroy {
         [receiver_id, sender_id]
       );
       console.log(deleteRequest.rows);
-      return {
-        deleteRequest,
-      };
+      return deleteRequest;
     } catch (e) {
       console.log(e);
     } finally {
       client.release();
     }
   }
-    async unsend_friend_request(senderID: number, receiverID: number) {
+
+  // create user settings
+  async create_userSetting(user_id: number) {
+    console.log(process.env.DB_PASSWORD as string);
+    const client = await this.pool.connect();
+    try {
+      const create_userSetting = await client.query(
+        'INSERT INTO settings (user_id, darkMode, privateMode, notification) VALUES ($1, $2, $3, $4) RETURNING *',
+        [user_id, false, false, false]
+      );
+      console.log(create_userSetting.rows);
+      return create_userSetting.rows[0];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  // update darkMode setting for user
+  async update_darkMode(user_id: number) {
+    console.log(process.env.DB_PASSWORD as string);
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT darkMode FROM settings WHERE user_id = $1',
+        [user_id]
+      );
+      const currentDarkMode = result.rows[0].darkMode;
+      const newDarkMode = !currentDarkMode;
+      const update_darkMode = await client.query(
+        'UPDATE settings SET darkMode = $1 WHERE user_id = $2 RETURNING *',
+        [newDarkMode, user_id]
+      );
+      console.log(update_darkMode.rows);
+      return update_darkMode.rows[0];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  // update private setting for user
+  async update_private(user_id: number) {
+    console.log(process.env.DB_PASSWORD as string);
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT privateMode FROM settings WHERE user_id = $1',
+        [user_id]
+      );
+      const currentPrivateMode = result.rows[0].privateMode;
+      const newPrivateMode = !currentPrivateMode;
+      const update_private = await client.query(
+        'UPDATE settings SET privateMode = $1 WHERE user_id = $2 RETURNING *',
+        [newPrivateMode, user_id]
+      );
+      console.log(update_private.rows);
+      return update_private.rows[0];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  // update notification setting for user
+  async update_notification(user_id: number) {
+    console.log(process.env.DB_PASSWORD as string);
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT notification FROM settings WHERE user_id = $1',
+        [user_id]
+      );
+      const currentNotification = result.rows[0].notification;
+      const newNotification = !currentNotification;
+      const update_notification = await client.query(
+        'UPDATE settings SET notification = $1 WHERE user_id = $2 RETURNING *',
+          [newNotification, user_id]
+      );
+      console.log(update_notification.rows);
+      return update_notification.rows[0];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async unsend_friend_request(senderID: number, receiverID: number) {
         const client = await this.pool.connect();
         try {
             const res = await client.query("DELETE FROM friendrequest WHERE senderID = $1 AND receiverID = $2 RETURNING *", [senderID, receiverID]);
