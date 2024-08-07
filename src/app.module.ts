@@ -11,11 +11,21 @@ import { FriendRequestModule } from './use_case/friend_request/friend_request.mo
 import { RequestDecisionModule } from './use_case/request_decision/request_decision.module';
 import { SettingsModule} from "./use_case/settings/settings.module";
 import { TicketMasterModule } from './data_access/TicketMaster/TicketMaster.module';
-
+import { ThreadModule } from './use_case/thread/thread.module';
 
 @Module({
-  imports: [SpotifyModule, BlockerModule, MessageModule, DatabaseModule, FriendRequestModule, RequestDecisionModule, SettingsModule, TicketMasterModule],
+  imports: [
+    SpotifyModule,
+    BlockerModule,
+    MessageModule,
+    DatabaseModule,
+    FriendRequestModule,
+    RequestDecisionModule,
+    SettingsModule,
+    TicketMasterModule,
+    ThreadModule
+  ],
   controllers: [AppController],
-  providers: [AppService, ],
+  providers: [AppService],
 })
 export class AppModule {}
