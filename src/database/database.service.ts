@@ -117,10 +117,13 @@ export class DatabaseService implements OnModuleDestroy {
   async acceptFriendRequest(receiver_id: number, sender_id: number) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
+    // did this to comply with the database constraint for friends
+    const user_id1 = Math.min(receiver_id, sender_id);
+    const user_id2 = Math.min(receiver_id, sender_id);
     try {
       const insertFriend = await client.query(
         'INSERT INTO friends (receiver_id, sender_id) VALUES ($1, $2) RETURNING *',
-        [receiver_id, sender_id]
+        [user_id1, user_id2]
       );
       console.log(insertFriend.rows);
       const deleteRequest = await client.query(
@@ -332,6 +335,20 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
    
+    async search_concert() {
+      const client = await this.pool.connect();
+      try{
+
+      }
+      catch (e){
+        console.log(e);
+      }
+      finally {
+        client.release();
+      }
+
+    }
+
     async add_thread(threadID: number, threadName: string) {
         const client = await this.pool.connect();
         try {
