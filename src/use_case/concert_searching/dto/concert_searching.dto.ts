@@ -1,9 +1,6 @@
 import { IsArray, isDate, IsDate, IsInt, IsOptional, IsString } from "class-validator";
 
-export interface DateRange {
-    start: Date;
-    end: Date;
-}
+// This class is used to validate the input data for the concert searching use case.
 
 export class ConcertSearchingDto {
     @IsOptional()

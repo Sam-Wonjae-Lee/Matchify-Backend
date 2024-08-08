@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { ConcertSearchingDto } from './dto/concert_searching.dto';
-import { DateRange } from './dto/concert_searching.dto';
+
 
 
 @Injectable()
@@ -21,8 +21,8 @@ export class ConcertSearchingService {
         } = concertSearchingDto;
 
         // get concerts from the database
-        const list_of_concerts = this.databaseService.get_concerts(performers, concert_name, genres, date_range_start, date_range_end, cities);
+        // const list_of_concerts = this.databaseService.get_concerts(performers, concert_name, genres, date_range_start, date_range_end, cities);
         
-        return list_of_concerts;
+        // return list_of_concerts;
     }
 }
