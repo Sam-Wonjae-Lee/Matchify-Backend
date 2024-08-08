@@ -94,8 +94,8 @@ export class TicketMasterService {
             }));
 
             // Add upcoming concerts to the database
-            this.databaseService.delete_old_concerts();
-            this.databaseService.update_concerts(events);
+            // this.databaseService.delete_old_concerts();
+            // this.databaseService.update_concerts(events);
 
             return events.map((event) => ({
                 id: event.concert_id,
