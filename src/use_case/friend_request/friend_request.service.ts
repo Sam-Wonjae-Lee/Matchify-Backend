@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from '../../database/database.service';
 import { SendFriendRequestDto } from './dto/send_friend_request.dto';
 
 @Injectable()
