@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DatabaseService } from './database.service';
+import { DatabaseService } from 'src/database/database.service';
 import { Pool } from 'pg';
 
 jest.mock('pg', () => {
@@ -15,24 +15,15 @@ jest.mock('pg', () => {
 
 describe('DatabaseService', () => {
   let service: DatabaseService;
-  let pool: jest.Mocked<Pool>;
+  let pool: Pool;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        DatabaseService,
-        {
-          provide: Pool,
-          useValue: {
-            connect: jest.fn(),
-            end: jest.fn(),
-          },
-        },
-      ],
+      providers: [DatabaseService],
     }).compile();
 
     service = module.get<DatabaseService>(DatabaseService);
-    pool = module.get<Pool>(Pool) as jest.Mocked<Pool>;
+    pool = module.get<Pool>(Pool);
   });
 
   it('should be defined', () => {
@@ -41,37 +32,33 @@ describe('DatabaseService', () => {
 
   it('should block a user', async () => {
     const mockClient = {
-      query: jest.fn().mockResolvedValue({}),
+      query: jest.fn().mockResolvedValue({ rows: [{ user: 1, blocked_user: 2 }] }),
       release: jest.fn(),
     };
     pool.connect.mockResolvedValue(mockClient);
 
-    await service.blockUser(1, 2);
+    const result = await service.blockUser(1, 2);
+    expect(result).toEqual({ rows: [{ user: 1, blocked_user: 2 }] });
     expect(mockClient.query).toHaveBeenCalledWith(
-      'INSERT INTO blocks VALUES ($1, $2);',
+      'INSERT INTO blocks VALUES ($1, $2) RETURNING *',
       [1, 2],
     );
     expect(mockClient.release).toHaveBeenCalled();
   });
 
-  it('should unblock a user and verify blocks table is empty', async () => {
+  it('should unblock a user', async () => {
     const mockClient = {
-      query: jest.fn()
-        .mockResolvedValueOnce({ rows: [{ user: 1, blocked_user: 2 }] }) // First call: unblock
-        .mockResolvedValueOnce({ rows: [] }), // Second call: check blocks table
+      query: jest.fn().mockResolvedValue({ rows: [{ user: 1, blocked_user: 2 }] }),
       release: jest.fn(),
     };
     pool.connect.mockResolvedValue(mockClient);
 
-    await service.unblockUser(1, 2);
+    const result = await service.unblockUser(1, 2);
+    expect(result).toEqual({ rows: [{ user: 1, blocked_user: 2 }] });
     expect(mockClient.query).toHaveBeenCalledWith(
-      'DELETE FROM blocks WHERE blocker = $1 AND blocked = $2;',
+      'DELETE FROM blocks WHERE blocker = $1 AND blocked = $2 RETURNING *',
       [1, 2],
     );
-
-    // Simulate checking if the blocks table is empty
-    const result = await mockClient.query('SELECT * FROM blocks WHERE blocker = $1 AND blocked = $2', [1, 2]);
-    expect(result.rows).toEqual([]);
     expect(mockClient.release).toHaveBeenCalled();
   });
 });

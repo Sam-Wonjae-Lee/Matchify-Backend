@@ -31,7 +31,6 @@ export class DatabaseService implements OnModuleDestroy {
         'INSERT INTO blocks VALUES ($1, $2) RETURNING *',
         [user, blocked_user],
       );
-      console.log(res.rows);
       return res;
     } catch (e) {
       console.log(e);
@@ -48,7 +47,6 @@ export class DatabaseService implements OnModuleDestroy {
         'DELETE FROM blocks WHERE blocker = $1 AND blocked = $2 RETURNING *',
         [user, unblocked_user],
       );
-      console.log(res.rows);
       return res;
     } catch (e) {
       console.log(e);

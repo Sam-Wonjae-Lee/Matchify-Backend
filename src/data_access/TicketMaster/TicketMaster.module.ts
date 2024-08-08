@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TicketMasterController } from './TicketMaster.controller';
 import { TicketMasterService } from './TicketMaster.service';
-import { DatabaseModule } from 'src/database/database.module';
+import { DatabaseModule } from '../../database/database.module';
 
 
 @Module({
