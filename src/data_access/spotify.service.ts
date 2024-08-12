@@ -66,8 +66,9 @@ export class SpotifyService {
     // TODO: STORE THE ACCESS TOKEN AND REFRESH TOKEN IN DATABASE
     // AFTER THAT WE WANT TO RETURN A PROFILE OBJECT <ProfileObjecet> TO INITIALIZE THE PERSON'S PROFILE PAGE AND HOME PAGE
     // WE NEED TO CHECK IF THE PERSON HAS MADE AN ACCOUNT WITH MATCHIFY BEFORE, IF NOT THEN MAKE <ProfileObject>'s ok to be false
-    console.log(data.access_token);
-    return {ok: true, user_id: "LOL", username: "POKPOK"};
+    console.log("Access Token: " + data.access_token);
+    console.log("\nPOKWDPOWKDPOWKDPW")
+    return {ok: true, user_id: "LOL", username: "POKPOK", access_token: data.access_token};
   }
 
   /**
