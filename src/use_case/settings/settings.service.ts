@@ -8,25 +8,25 @@ export class SettingsService {
 
   // create user settings
   create(settingsDto: SettingsDto) {
-    const { user_id} = settingsDto;
-    this.databaseService.create_userSetting (user_id);
+    const { userid} = settingsDto;
+    this.databaseService.create_userSetting (userid);
   }
 
   // enable and disable dark mode
   dark_mode(settingsDto: SettingsDto) {
-    const { user_id} = settingsDto;
-    this.databaseService.update_darkMode(user_id);
+    const { userid} = settingsDto;
+    this.databaseService.update_darkMode(userid);
   }
 
   // enable and disable private mode
   private(settingsDto: SettingsDto) {
-    const { user_id} = settingsDto;
-    this.databaseService.update_private(user_id);
+    const { userid} = settingsDto;
+    this.databaseService.update_private(userid);
   }
 
   // enable and disable notification
   notification(settingsDto: SettingsDto) {
-    const { user_id} = settingsDto;
-    this.databaseService.update_notification(user_id);
+    const { userid} = settingsDto;
+    this.databaseService.update_notification(userid);
   }
 }

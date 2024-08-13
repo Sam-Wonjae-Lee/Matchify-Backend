@@ -2,7 +2,7 @@ import { IsBoolean, IsInt } from "class-validator";
 
 export class SettingsDto {
   @IsInt()
-  readonly user_id: number;
+  readonly userid: number;
 
   @IsBoolean()
   readonly darkMode: boolean;

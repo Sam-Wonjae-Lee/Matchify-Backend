@@ -26,7 +26,7 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
-        'DELETE FROM tokens WHERE user_id = $1 RETURNING *',
+        'DELETE FROM tokens WHERE userid = $1 RETURNING *',
         [user],
       );
       const res2 = await client.query(
@@ -135,16 +135,16 @@ export class DatabaseService implements OnModuleDestroy {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     // did this to comply with the database constraint for friends
-    const user_id1 = Math.min(receiver_id, sender_id);
-    const user_id2 = Math.min(receiver_id, sender_id);
+    const userid1 = Math.min(receiver_id, sender_id);
+    const userid2 = Math.min(receiver_id, sender_id);
     try {
       const insertFriend = await client.query(
-        'INSERT INTO friends (receiver_id, sender_id) VALUES ($1, $2) RETURNING *',
-        [user_id1, user_id2]
+        'INSERT INTO friends (receiver, sender) VALUES ($1, $2) RETURNING *',
+        [userid1, userid2]
       );
       console.log(insertFriend.rows);
       const deleteRequest = await client.query(
-        'DELETE FROM friendrequest WHERE receiver_id = $1 AND sender_id = $2 RETURNING *',
+        'DELETE FROM friendrequest WHERE receiver = $1 AND sender = $2 RETURNING *',
         [receiver_id, sender_id]
       );
       console.log(deleteRequest.rows);
@@ -165,7 +165,7 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       const deleteRequest = await client.query(
-        'DELETE FROM friendrequest WHERE receiver_id = $1 AND sender_id = $2 RETURNING *',
+        'DELETE FROM friendrequest WHERE receiver = $1 AND sender = $2 RETURNING *',
         [receiver_id, sender_id]
       );
       console.log(deleteRequest.rows);
@@ -178,13 +178,13 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // create user settings
-  async create_userSetting(user_id: number) {
+  async create_userSetting(userid: number) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
       const create_userSetting = await client.query(
-        'INSERT INTO settings (user_id, darkMode, privateMode, notification) VALUES ($1, $2, $3, $4) RETURNING *',
-        [user_id, false, false, false]
+        'INSERT INTO settings (userid, darkMode, privateMode, notification) VALUES ($1, $2, $3, $4) RETURNING *',
+        [userid, false, false, false]
       );
       console.log(create_userSetting.rows);
       return create_userSetting.rows[0];
@@ -196,19 +196,21 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // update darkMode setting for user
-  async update_darkMode(user_id: number) {
+  async update_darkMode(userid: number) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
       const result = await client.query(
-        'SELECT darkMode FROM settings WHERE user_id = $1',
-        [user_id]
+        'SELECT darkMode FROM settings WHERE userid = $1',
+        [userid]
       );
       const currentDarkMode = result.rows[0].darkMode;
+      console.log(currentDarkMode);
       const newDarkMode = !currentDarkMode;
+      console.log(newDarkMode);
       const update_darkMode = await client.query(
-        'UPDATE settings SET darkMode = $1 WHERE user_id = $2 RETURNING *',
-        [newDarkMode, user_id]
+        'UPDATE settings SET darkMode = $1 WHERE userid = $2 RETURNING *',
+        [newDarkMode, userid]
       );
       console.log(update_darkMode.rows);
       return update_darkMode.rows[0];
@@ -220,19 +222,19 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // update private setting for user
-  async update_private(user_id: number) {
+  async update_private(userid: number) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
       const result = await client.query(
-        'SELECT privateMode FROM settings WHERE user_id = $1',
-        [user_id]
+        'SELECT privateMode FROM settings WHERE userid = $1',
+        [userid]
       );
       const currentPrivateMode = result.rows[0].privateMode;
       const newPrivateMode = !currentPrivateMode;
       const update_private = await client.query(
-        'UPDATE settings SET privateMode = $1 WHERE user_id = $2 RETURNING *',
-        [newPrivateMode, user_id]
+        'UPDATE settings SET privateMode = $1 WHERE userid = $2 RETURNING *',
+        [newPrivateMode, userid]
       );
       console.log(update_private.rows);
       return update_private.rows[0];
@@ -244,19 +246,19 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // update notification setting for user
-  async update_notification(user_id: number) {
+  async update_notification(userid: number) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
       const result = await client.query(
-        'SELECT notification FROM settings WHERE user_id = $1',
-        [user_id]
+        'SELECT notification FROM settings WHERE userid = $1',
+        [userid]
       );
       const currentNotification = result.rows[0].notification;
       const newNotification = !currentNotification;
       const update_notification = await client.query(
-        'UPDATE settings SET notification = $1 WHERE user_id = $2 RETURNING *',
-          [newNotification, user_id]
+        'UPDATE settings SET notification = $1 WHERE userid = $2 RETURNING *',
+          [newNotification, userid]
       );
       console.log(update_notification.rows);
       return update_notification.rows[0];
@@ -270,7 +272,7 @@ export class DatabaseService implements OnModuleDestroy {
   async unsend_friend_request(senderID: number, receiverID: number) {
         const client = await this.pool.connect();
         try {
-            const res = await client.query("DELETE FROM friendrequest WHERE senderID = $1 AND receiverID = $2 RETURNING *", [senderID, receiverID]);
+            const res = await client.query("DELETE FROM friendrequest WHERE sender = $1 AND receiver = $2 RETURNING *", [senderID, receiverID]);
             console.log(res.rows);
         return res;
         } 

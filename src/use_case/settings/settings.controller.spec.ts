@@ -32,25 +32,25 @@ describe('SettingsController', () => {
   });
 
   it('should call create method of SettingsService', async () => {
-    const settingsDto: SettingsDto = { user_id: 1, darkMode: true, privateMode: false, notification: true };
+    const settingsDto: SettingsDto = { userid: 1, darkMode: true, privateMode: false, notification: true };
     await controller.create(settingsDto);
     expect(service.create).toHaveBeenCalledWith(settingsDto);
   });
 
   it('should call dark_mode method of SettingsService', async () => {
-    const settingsDto: SettingsDto = { user_id: 1, darkMode: true, privateMode: false, notification: true };
+    const settingsDto: SettingsDto = { userid: 1, darkMode: true, privateMode: false, notification: true };
     await controller.dark_mode(settingsDto);
     expect(service.dark_mode).toHaveBeenCalledWith(settingsDto);
   });
 
   it('should call private method of SettingsService', async () => {
-    const settingsDto: SettingsDto = { user_id: 1, darkMode: true, privateMode: false, notification: true };
+    const settingsDto: SettingsDto = { userid: 1, darkMode: true, privateMode: false, notification: true };
     await controller.private(settingsDto);
     expect(service.private).toHaveBeenCalledWith(settingsDto);
   });
 
   it('should call notification method of SettingsService', async () => {
-    const settingsDto: SettingsDto = { user_id: 1, darkMode: true, privateMode: false, notification: true };
+    const settingsDto: SettingsDto = { userid: 1, darkMode: true, privateMode: false, notification: true };
     await controller.notification(settingsDto);
     expect(service.notification).toHaveBeenCalledWith(settingsDto);
   });
