@@ -22,6 +22,25 @@ export class DatabaseService implements OnModuleDestroy {
     await this.pool.end();
   }
 
+  async addAccessRefreshToken(user: number, access_token: string, refresh_token: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'DELETE FROM tokens WHERE user_id = $1 RETURNING *',
+        [user],
+      );
+      const res2 = await client.query(
+        'INSERT INTO tokens VALUES ($1, $2, $3) RETURNING *',
+        [user, access_token, refresh_token],
+      );
+      return res2;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
   // adds (user, blocked_user) to blocks table
   async blockUser(user: number, blocked_user: number) {
     console.log(process.env.DB_PASSWORD as string);

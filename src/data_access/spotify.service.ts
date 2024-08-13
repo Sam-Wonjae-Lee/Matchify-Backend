@@ -1,4 +1,5 @@
 import { Injectable, HttpException, Redirect } from '@nestjs/common';
+import { DatabaseService } from 'src/database/database.service';
 
 export interface ProfileObject {
   ok: boolean,
@@ -8,11 +9,12 @@ export interface ProfileObject {
 
 @Injectable()
 export class SpotifyService {
+
   private clientID: string;
   private clientSecret: string;
   private redirectURI: string;
 
-  constructor() {
+  constructor(private readonly databaseService: DatabaseService) {
     this.clientID = process.env.SPOTIFY_CLIENT_ID;
     this.clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
     this.redirectURI = process.env.SPOTIFY_REDIRECT_URI;
@@ -25,32 +27,30 @@ export class SpotifyService {
    * @return Temporary access token in JSON Format
    */
 
-  private async getAccessToken(): Promise<string> {
-    const response = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',   // For creating resources
-      body: new URLSearchParams({
-        'grant_type': 'client_credentials',
-      }),
+  public async getMyUserInfo(accessToken: string): Promise<any> {
+
+    const response = await fetch("https://api.spotify.com/v1/me", {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'Basic ' + (Buffer.from(this.clientID + ':' + this.clientSecret).toString('base64')),
+        'Authorization': `Bearer ${accessToken}`,
       },
     });
 
-    if (!response.ok) {
-      throw new HttpException('Failed to retrieve access token', response.status);
-    }
+    // if (!response.ok) {
+    //   throw new HttpException('Failed to retrieve user info', response.status);
+    // }
 
     const data = await response.json();
-    return data.access_token;
+    return data;
   }
+
 
   public async authenticateCode(code: string) {
     const response = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',   // For creating resources
       body: new URLSearchParams({
-        'grant_type': 'client_credentials',
+        'grant_type': 'authorization_code',
         'code': code,
+        'redirect_uri': this.redirectURI,
       }),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -58,17 +58,18 @@ export class SpotifyService {
       },
     });
 
-    if (!response.ok) {
-      throw new HttpException('Failed to retrieve access token', response.status);
-    }
+    // if (!response.ok) {
+    //   throw new HttpException('Failed to retrieve access token', response.status);
+    // }
+
 
     const data = await response.json();
-    // TODO: STORE THE ACCESS TOKEN AND REFRESH TOKEN IN DATABASE
-    // AFTER THAT WE WANT TO RETURN A PROFILE OBJECT <ProfileObjecet> TO INITIALIZE THE PERSON'S PROFILE PAGE AND HOME PAGE
-    // WE NEED TO CHECK IF THE PERSON HAS MADE AN ACCOUNT WITH MATCHIFY BEFORE, IF NOT THEN MAKE <ProfileObject>'s ok to be false
+    const profileData = await this.getMyUserInfo(data.access_token);
+    const db_response = await this.databaseService.addAccessRefreshToken(profileData.id, data.access_token, data.refresh_token);
+    console.log(db_response);
     console.log("Access Token: " + data.access_token);
-    console.log("\nPOKWDPOWKDPOWKDPW")
-    return {ok: true, user_id: "LOL", username: "POKPOK", access_token: data.access_token};
+    console.log(profileData);
+    return profileData;
   }
 
   /**
@@ -87,8 +88,7 @@ export class SpotifyService {
    * @param userId A string containing the Spotify user ID.
    * @returns A JSONObject containing the response data for the Spotify user.
    */
-  public async getUserInfo(userId: string): Promise<any> {
-    const accessToken = await this.getAccessToken();
+  public async getUserInfo(userId: string, accessToken: string): Promise<any> {
 
     const response = await fetch(`https://api.spotify.com/v1/users/${userId}`, {
       headers: {
@@ -96,9 +96,9 @@ export class SpotifyService {
       },
     });
 
-    if (!response.ok) {
-      throw new HttpException('Failed to retrieve user info', response.status);
-    }
+    // if (!response.ok) {
+    //   throw new HttpException('Failed to retrieve user info', response.status);
+    // }
 
     return response.json();
   }
@@ -109,8 +109,7 @@ export class SpotifyService {
    * @param userId A string containing the Spotify user ID.
    * @return A JSONObject containing the response data for the user's playlist.
    * */
-  public async getUserPlaylists(userId: string): Promise<any> {
-    const accessToken = await this.getAccessToken();
+  public async getUserPlaylists(userId: string, accessToken: string): Promise<any> {
 
     const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
       headers: {
@@ -118,9 +117,9 @@ export class SpotifyService {
       },
     });
 
-    if (!response.ok) {
-        throw new HttpException('Failed to retrieve playlist info', response.status);
-    }
+    // if (!response.ok) {
+    //     throw new HttpException('Failed to retrieve playlist info', response.status);
+    // }
   
     return response.json();
   }
@@ -131,17 +130,16 @@ export class SpotifyService {
    * @param userId A string containing the Spotify playlist ID.
    * @return A JSONObject containing the response data for playlist.
    * */
-  public async getPlaylistItems(playlistId: string): Promise<any> {
-    const accessToken = await this.getAccessToken();
+  public async getPlaylistItems(playlistId: string, accessToken: string): Promise<any> {
 
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
       },
     });
-    if (!response.ok) {
-        throw new HttpException('Failed to retrieve playlist info', response.status);
-    }
+    // if (!response.ok) {
+    //     throw new HttpException('Failed to retrieve playlist info', response.status);
+    // }
 
     return response.json();
   }
@@ -152,17 +150,16 @@ export class SpotifyService {
    * @param userId A string containing the Spotify song ID.
    * @return A JSONObject containing the response data for song attributes.
    * */
-  public async getTrackAudioFeatures(trackId: string): Promise<any> {
-    const accessToken = await this.getAccessToken();
+  public async getTrackAudioFeatures(trackId: string, accessToken: string): Promise<any> {
 
     const response = await fetch(`https://api.spotify.com/v1/audio-features/${trackId}`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
       },
     });
-    if (!response.ok) {
-        throw new HttpException('Failed to retrieve playlist info', response.status);
-    }
+    // if (!response.ok) {
+    //     throw new HttpException('Failed to retrieve playlist info', response.status);
+    // }
 
     return response.json();
   }
