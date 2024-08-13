@@ -15,4 +15,8 @@ export class AttendConcertService {
         const {userID, concertID} = attendConcertDto;
         this.databaseService.remove_user_from_concert(userID, concertID);
     }
+
+    is_user_attending_concert(userID: number, concertID: string) {
+        return this.databaseService.is_user_attending_concert(userID, concertID);
+    }
 }

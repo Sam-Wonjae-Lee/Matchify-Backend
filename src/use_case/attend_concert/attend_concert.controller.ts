@@ -15,4 +15,9 @@ export class AttendConcertController {
     unattend_concert(@Body() attendConcertDto: AttendConcertDto) {
         return this.attendConcertService.unattend_concert(attendConcertDto);
     }
+
+    @Post()
+    is_user_attending_concert(@Body() attendConcertDto: AttendConcertDto) {
+        return this.attendConcertService.is_user_attending_concert(attendConcertDto.userID, attendConcertDto.concertID);
+    }
 }

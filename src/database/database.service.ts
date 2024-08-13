@@ -406,4 +406,19 @@ export class DatabaseService implements OnModuleDestroy {
             client.release();
         }
     }
+
+    // if user is attending concert then return 1, else return 0
+    async is_user_attending_concert(userID: number, concertID: string) {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("SELECT COUNT(*) FROM user_concert WHERE userID = $1 AND concertID = $2", [userID, concertID]);
+            return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
 }
