@@ -183,7 +183,7 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       const create_userSetting = await client.query(
-        'INSERT INTO settings (userid, darkMode, privateMode, notification) VALUES ($1, $2, $3, $4) RETURNING *',
+        'INSERT INTO settings (userid, darkMode, private, notification) VALUES ($1, $2, $3, $4) RETURNING *',
         [userid, false, false, false]
       );
       console.log(create_userSetting.rows);
@@ -204,7 +204,7 @@ export class DatabaseService implements OnModuleDestroy {
         'SELECT darkMode FROM settings WHERE userid = $1',
         [userid]
       );
-      const currentDarkMode = result.rows[0].darkMode;
+      const currentDarkMode = result.rows[0].darkmode.valueOf();
       console.log(currentDarkMode);
       const newDarkMode = !currentDarkMode;
       console.log(newDarkMode);
@@ -227,13 +227,13 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       const result = await client.query(
-        'SELECT privateMode FROM settings WHERE userid = $1',
+        'SELECT private FROM settings WHERE userid = $1',
         [userid]
       );
-      const currentPrivateMode = result.rows[0].privateMode;
+      const currentPrivateMode = result.rows[0].private.valueOf();
       const newPrivateMode = !currentPrivateMode;
       const update_private = await client.query(
-        'UPDATE settings SET privateMode = $1 WHERE userid = $2 RETURNING *',
+        'UPDATE settings SET private = $1 WHERE userid = $2 RETURNING *',
         [newPrivateMode, userid]
       );
       console.log(update_private.rows);
@@ -254,7 +254,7 @@ export class DatabaseService implements OnModuleDestroy {
         'SELECT notification FROM settings WHERE userid = $1',
         [userid]
       );
-      const currentNotification = result.rows[0].notification;
+      const currentNotification = result.rows[0].notification.valueOf();
       const newNotification = !currentNotification;
       const update_notification = await client.query(
         'UPDATE settings SET notification = $1 WHERE userid = $2 RETURNING *',
