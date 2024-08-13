@@ -13,6 +13,7 @@ import { SettingsModule} from "./use_case/settings/settings.module";
 import { TicketMasterModule } from './data_access/TicketMaster/TicketMaster.module';
 import { ThreadModule } from './use_case/thread/thread.module';
 import { ConcertSearchingModule } from './use_case/concert_searching/concert_searching.module';
+import { AttendConcertModule } from './use_case/attend_concert/attend_concert.module';
 
 
 @Module({
@@ -26,7 +27,8 @@ import { ConcertSearchingModule } from './use_case/concert_searching/concert_sea
     SettingsModule,
     TicketMasterModule,
     ThreadModule,
-    ConcertSearchingModule
+    ConcertSearchingModule,
+    AttendConcertModule
   ],
   controllers: [AppController],
   providers: [AppService],
