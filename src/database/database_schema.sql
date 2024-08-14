@@ -26,6 +26,7 @@ CREATE TABLE users (
     dob DATE NOT NULL,
     bio TEXT NOT NULL,
     email TEXT NOT NULL,
+    gender TEXT NOT NULL,
     profile_pic TEXT NOT NULL,
     favourite_playlist TEXT NOT NULL
 );
