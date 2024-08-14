@@ -24,7 +24,6 @@ export class SpotifyController {
   @Post('auth/callback')
   async authenticateCode(@Body('code') code: string) {
     const response = await this.spotifyService.authenticateCode(code);
-    console.log("PAOKWDPOKWDAOWPD");
     return response;
   }
 }
