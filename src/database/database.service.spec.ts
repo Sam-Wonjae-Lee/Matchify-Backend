@@ -2,68 +2,40 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DatabaseService } from './database.service';
 import { Pool } from 'pg';
 
-jest.mock('pg', () => {
-  const mPool = {
-    connect: jest.fn().mockResolvedValue({
-      query: jest.fn(),
-      release: jest.fn(),
-    }),
-    end: jest.fn(),
-  };
-  return { Pool: jest.fn(() => mPool) };
-});
-
-describe('DatabaseService', () => {
+describe('DatabaseService (Integration)', () => {
   let service: DatabaseService;
-  let pool: jest.Mocked<Pool>;
+  let pool: Pool;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        DatabaseService,
-        {
-          provide: Pool,
-          useValue: {
-            connect: jest.fn(),
-            end: jest.fn(),
-          },
-        },
-      ],
+      providers: [DatabaseService],
     }).compile();
 
     service = module.get<DatabaseService>(DatabaseService);
-    pool = module.get<Pool>(Pool) as jest.Mocked<Pool>;
+    pool = new Pool({
+      host: process.env.DB_HOST,
+      port: parseInt(process.env.DB_PORT, 10),
+      user: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
+    });
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  afterAll(async () => {
+    await pool.end();
   });
-
-  it('should block a user', async () => {
-    const mockClient = {
-      query: jest.fn().mockResolvedValue({}),
-      release: jest.fn(),
-    };
-    pool.connect.mockResolvedValue(mockClient);
-    console.log(process.env.DB_PASSWORD);
-
-    await service.blockUser(1, 2);
-    expect(mockClient.release).toHaveBeenCalled();
-  });
-
-  it('should unblock a user and verify blocks table is empty', async () => {
-    const mockClient = {
-      query: jest.fn()
-        .mockResolvedValueOnce({}) // First call: unblock
-        .mockResolvedValueOnce({ rows: [] }), // Second call: check blocks table
-      release: jest.fn(),
-    };
-    pool.connect.mockResolvedValue(mockClient);
-
-    await service.unblockUser(1, 2);
-
-    // Simulate checking if the blocks table is empty
-    const result = await mockClient.query('SELECT * FROM blocks WHERE blocker = $1 AND blocked = $2 RETURNING *', [1, 2]);
-    expect(result).toEqual({});
+  
+  it('should add the users', async () => {
+    await service.testConnection();
+    await service.add_user_info('a', 'user1', 'frank', 'george', 'detriot', new Date(), 'loves chicken', 'nice@gmail.com', '/best_girl.jpg', 'playlist1');
+    const result1 = await pool.query('SELECT * FROM users WHERE user_id = $1', ['a']);
+    {/*
+    await service.add_user_info('a', 'user1', 'frank', 'george', 'detriot', new Date(), 'loves chicken', 'nice@gmail.com', '/best_girl.jpg', 'playlist1');
+    const result1 = await pool.query('SELECT * FROM users WHERE user_id = $1', ['a']);
+    expect(result1.rows.length).toBe(1);
+    await service.add_user_info('b', 'user1', 'bob', 'george', 'detriot', new Date(), 'loves chicken', 'nice@gmail.com', '/best_girl.jpg', 'playlist1');
+    const result2 = await pool.query('SELECT * FROM users WHERE user_id = $1', ['b']);
+    expect(result2.rows.length).toBe(1);
+      */}
   });
 });

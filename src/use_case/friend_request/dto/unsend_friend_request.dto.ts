@@ -1,9 +1,9 @@
-import { IsInt } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class UnsendFriendRequestDto {
-  @IsInt()
-  readonly senderID: number;
+  @IsString()
+  readonly senderID: string;
 
-  @IsInt()
-  readonly receiverID: number;
+  @IsString()
+  readonly receiverID: string;
 }
