@@ -43,6 +43,9 @@ export class SpotifyService {
     return data;
   }
 
+  public async createAccount(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender) {
+    return await this.databaseService.addUserInfo(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender);
+  }
 
   public async authenticateCode(code: string) {
     const response = await fetch('https://accounts.spotify.com/api/token', {
@@ -62,14 +65,19 @@ export class SpotifyService {
     //   throw new HttpException('Failed to retrieve access token', response.status);
     // }
 
-
     const data = await response.json();
     const profileData = await this.getMyUserInfo(data.access_token);
-    const db_response = await this.databaseService.addAccessRefreshToken(profileData.id, data.access_token, data.refresh_token);
-    console.log(db_response);
-    console.log("Access Token: " + data.access_token);
+    const user = await this.databaseService.getUser(profileData.id);
+    let isCreation = true;
+    if (user.length > 0) {
+      isCreation = false;
+      // if user exists we update our db with latest spotify data
+      this.databaseService.updateUserInfo({user_id: profileData.id, username: profileData.display_name, email: profileData.email, profile_pic: profileData.images[0].url})
+    }
+    await this.databaseService.addAccessRefreshToken(profileData.id, data.access_token, data.refresh_token);
+    console.log(data);
     console.log(profileData);
-    return profileData;
+    return {profileData, isCreation};
   }
 
   /**
