@@ -26,4 +26,10 @@ export class SpotifyController {
     const response = await this.spotifyService.authenticateCode(code);
     return response;
   }
+
+  @Post('auth/create')
+  async createAccount(@Body('user_id') user_id: string, @Body('username') username: string, @Body('first_name') first_name: string, @Body('last_name') last_name: string, @Body('location') location: string, @Body('dob') dob: Date, @Body('bio') bio: string, @Body('email') email: string, @Body('profile_pic') profile_pic: string, @Body('favourite_playlist') favourite_playlist: string, @Body('gender') gender: string) {
+    const response = await this.spotifyService.createAccount(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender);
+    return response;
+  }
 }

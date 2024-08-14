@@ -43,6 +43,10 @@ export class SpotifyService {
     return data;
   }
 
+  public async createAccount(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender) {
+    return await this.databaseService.addUserInfo(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender);
+  }
+
   /**
    * Retrieves the access token. The access token is a string which contains the credentials and permissions that can be used to access resources.
    * The access token is valid for 1 hour. After that time, the token expires and you need to request a new one.
@@ -67,16 +71,19 @@ export class SpotifyService {
     //   throw new HttpException('Failed to retrieve access token', response.status);
     // }
 
-
     const data = await response.json();
     const profileData = await this.getMyUserInfo(data.access_token);
-    const db_response_token = await this.databaseService.addAccessRefreshToken(profileData.id, data.access_token, data.refresh_token);
-    // console.log(db_response);
-    // console.log("Access Token: " + data.access_token);
-    // console.log(profileData);
-    
-
-    return profileData;
+    const user = await this.databaseService.getUser(profileData.id);
+    let isCreation = true;
+    if (user.length > 0) {
+      isCreation = false;
+      // if user exists we update our db with latest spotify data
+      this.databaseService.updateUserInfo({user_id: profileData.id, username: profileData.display_name, email: profileData.email, profile_pic: profileData.images[0].url})
+    }
+    await this.databaseService.addAccessRefreshToken(profileData.id, data.access_token, data.refresh_token);
+    console.log(data);
+    console.log(profileData);
+    return {profileData, isCreation};
   }
 
   /**

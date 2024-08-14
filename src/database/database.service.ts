@@ -61,7 +61,7 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
-        'DELETE FROM tokens WHERE userid = $1 RETURNING *',
+        'DELETE FROM tokens WHERE user_id = $1 RETURNING *',
         [user],
       );
       const res2 = await client.query(
@@ -75,6 +75,96 @@ export class DatabaseService implements OnModuleDestroy {
       client.release();
     }
   }
+
+  async getUser(user: number) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT FROM users WHERE user_id = $1',
+        [user],
+      );
+      return res.rows;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async addUserInfo(user_id: string, username: string, first_name: string, last_name: string, location: string, dob: Date, bio: string, email: string, profile_pic: string, favourite_playlist: string, gender: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+        [user_id, username, first_name, last_name, location, dob, bio, email, gender, profile_pic, favourite_playlist]
+      );
+      return { success: true }
+    } catch (e) {
+      console.log(e);
+      if (e.code === '23505') { // Unique violation error code in PostgreSQL
+        if (e.detail.includes('user_id')) {
+          return { success: false, message: 'User ID already exists.' };
+        } 
+      }
+      return { success: false, message: 'Error with account creation.' };
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateUserInfo({
+    user_id,
+    username = null,
+    first_name = null,
+    last_name = null,
+    location = null,
+    dob = null,
+    bio = null,
+    email = null,
+    profile_pic = null,
+    favourite_playlist = null,
+    gender = null
+  }) {
+    const client = await this.pool.connect();
+    try {
+      if (username !== null) {
+        client.query('UPDATE users SET username = $1 WHERE user_id = $2', [username, user_id]);
+      }
+      if (first_name !== null) {
+        client.query('UPDATE users SET first_name = $1 WHERE user_id = $2', [first_name, user_id]);
+      }
+      if (last_name !== null) {
+        client.query('UPDATE users SET last_name = $1 WHERE user_id = $2', [last_name, user_id]);
+      }
+      if (location !== null) {
+        client.query('UPDATE users SET location = $1 WHERE user_id = $2', [location, user_id]);
+      }
+      if (dob !== null) {
+        client.query('UPDATE users SET dob = $1 WHERE user_id = $2', [dob, user_id]);
+      }
+      if (bio !== null) {
+        client.query('UPDATE users SET bio = $1 WHERE user_id = $2', [bio, user_id]);
+      }
+      if (email !== null) {
+        client.query('UPDATE users SET email = $1 WHERE user_id = $2', [email, user_id]);
+      }
+      if (profile_pic !== null) {
+        client.query('UPDATE users SET profile_pic = $1 WHERE user_id = $2', [profile_pic, user_id]);
+      }
+      if (favourite_playlist !== null) {
+        client.query('UPDATE users SET favourite_playlist = $1 WHERE user_id = $2', [favourite_playlist, user_id]);
+      }
+      if (gender !== null) {
+        client.query('UPDATE users SET gender = $1 WHERE user_id = $2', [gender, user_id]);
+      }
+
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+  
 
   // adds (user, blocked_user) to blocks table
   async blockUser(user: number, blocked_user: number) {
