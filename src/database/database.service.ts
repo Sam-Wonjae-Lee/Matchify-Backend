@@ -6,6 +6,8 @@ import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { Pool } from 'pg';
 // import { escape } from 'querystring';
 // import { Interface } from 'readline';
+const dotenv = require('dotenv');
+dotenv.config();
 
 
 @Injectable()
@@ -25,28 +27,25 @@ export class DatabaseService implements OnModuleDestroy {
     await this.pool.end();
   }
   
-  async testConnection() {
-    let client;
-    try {
-      client = await this.pool.connect();
-      await client.query('SELECT 1');
-      console.log('Database connection successful');
-    } catch (error) {
-      console.error('Database connection failed', error);
-    } finally {
-      if(client){
-        client.release();
-      }
-    }
-  }
-  
-  async add_user_info(user_id: string, username: string, first_name: string, last_name: string, location: string, dob: Date, bio: string, email: string, profile_pic: string, favourite_playlist: string) {
+  async add_user_info(user_id: string, username: string, first_name: string, last_name: string, location: string, dob: Date, bio: string, email: string, gender: string, profile_pic: string, favourite_playlist: string) {
     let client;
     try {
       client = await this.pool.connect();
       const res = await client.query(
-        'INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-        [user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist]
+        'INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+        [
+          user_id,
+          username,
+          first_name,
+          last_name,
+          location,
+          dob,
+          bio,
+          email,
+          gender,
+          profile_pic,
+          favourite_playlist
+        ]
       );
       return res.rows[0];
     } catch (error) {
