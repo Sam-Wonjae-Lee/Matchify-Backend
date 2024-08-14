@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 import { Injectable, OnModuleDestroy, Logger } from '@nestjs/common';
+=======
+/**
+ * For manipulating values in database
+ */
+
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
+>>>>>>> 1b48f79e15f7594a111efa3b1e1c234864d7dc84
 import { Pool } from 'pg';
 // import { escape } from 'querystring';
 // import { Interface } from 'readline';
