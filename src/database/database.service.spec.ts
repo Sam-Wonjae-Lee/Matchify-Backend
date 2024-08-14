@@ -35,10 +35,10 @@ describe('DatabaseService (Integration)', () => {
   });
   
   it('should add the users', async () => {
-    await service.add_user_info('a', 'user1', 'frank', 'george', 'detriot', new Date(), 'loves chicken', 'nice@gmail.com', "gay", '/best_girl.jpg', 'playlist1');
+    await service.addUserInfo('a', 'user1', 'frank', 'george', 'detriot', new Date(), 'loves chicken', 'nice@gmail.com', '/best_girl.jpg', 'playlist1', "gay");
     const result1 = await pool.query('SELECT * FROM users WHERE user_id = $1 AND gender = $2', ['a', 'gay']);
     expect(result1.rows.length).toBe(1);
-    await service.add_user_info('b', 'user1', 'bob', 'george', 'detriot', new Date(), 'loves chicken', 'nice@gmail.com', '/best_girl.jpg', 'male','playlist1');
+    await service.addUserInfo('b', 'user1', 'bob', 'george', 'detriot', new Date(), 'loves chicken', 'nice@gmail.com', '/best_girl.jpg','playlist1', "gay");
     const result2 = await pool.query('SELECT * FROM users WHERE user_id = $1', ['b']);
     expect(result2.rows.length).toBe(1);
   });

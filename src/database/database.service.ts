@@ -26,36 +26,6 @@ export class DatabaseService implements OnModuleDestroy {
   async onModuleDestroy() {
     await this.pool.end();
   }
-  
-  async add_user_info(user_id: string, username: string, first_name: string, last_name: string, location: string, dob: Date, bio: string, email: string, gender: string, profile_pic: string, favourite_playlist: string) {
-    let client;
-    try {
-      client = await this.pool.connect();
-      const res = await client.query(
-        'INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
-        [
-          user_id,
-          username,
-          first_name,
-          last_name,
-          location,
-          dob,
-          bio,
-          email,
-          gender,
-          profile_pic,
-          favourite_playlist
-        ]
-      );
-      return res.rows[0];
-    } catch (error) {
-      throw error;
-    } finally {
-      if(client){
-        client.release();
-      }
-    }
-  }
 
   async addAccessRefreshToken(user: number, access_token: string, refresh_token: string) {
     const client = await this.pool.connect();
