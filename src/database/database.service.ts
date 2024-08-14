@@ -137,7 +137,7 @@ export class DatabaseService implements OnModuleDestroy {
   
 
   // adds (user, blocked_user) to blocks table
-  async blockUser(user: number, blocked_user: number) {
+  async blockUser(user: string, blocked_user: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
@@ -154,7 +154,7 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // deletes (user, blocked_user) from blocks table
-  async unblockUser(user: number, unblocked_user: number) {
+  async unblockUser(user: string, unblocked_user: string) {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
@@ -172,7 +172,7 @@ export class DatabaseService implements OnModuleDestroy {
   // message use case
   async add_message(
     messageID: number,
-    userID: number,
+    userID: string,
     threadID: number,
     content: string,
   ) {
@@ -293,7 +293,7 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // create user settings
-  async create_userSetting(userid: number) {
+  async create_userSetting(userid: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
@@ -311,7 +311,7 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // update darkMode setting for user
-  async update_darkMode(userid: number) {
+  async update_darkMode(userid: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
@@ -337,7 +337,7 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // update private setting for user
-  async update_private(userid: number) {
+  async update_private(userid: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
@@ -361,7 +361,7 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // update notification setting for user
-  async update_notification(userid: number) {
+  async update_notification(userid: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
@@ -510,6 +510,7 @@ export class DatabaseService implements OnModuleDestroy {
     async remove_thread(threadID: number) {
         const client = await this.pool.connect();
         try {
+          // Currently this is not working because threadID is thread_id in the database
             const res = await client.query("DELETE FROM thread WHERE threadID = $1 RETURNING *", [threadID]);
             console.log(res.rows);
             return res;
@@ -522,7 +523,7 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
 
-    async add_user_to_concert(userID: number, concertID: string) {
+    async add_user_to_concert(userID: string, concertID: string) {
         const client = await this.pool.connect();
         try {
             const res = await client.query("INSERT INTO user_concert VALUES ($1, $2) RETURNING *", [userID, concertID]);
@@ -537,7 +538,7 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
 
-    async remove_user_from_concert(userID: number, concertID: string) {
+    async remove_user_from_concert(userID: string, concertID: string) {
         const client = await this.pool.connect();
         try {
             const res = await client.query("DELETE FROM user_concert WHERE userID = $1 AND concertID = $2 RETURNING *", [userID, concertID]);
@@ -553,7 +554,7 @@ export class DatabaseService implements OnModuleDestroy {
     }
 
     // if user is attending concert then return 1, else return 0
-    async is_user_attending_concert(userID: number, concertID: string) {
+    async is_user_attending_concert(userID: string, concertID: string) {
         const client = await this.pool.connect();
         try {
             const res = await client.query("SELECT COUNT(*) FROM user_concert WHERE userID = $1 AND concertID = $2", [userID, concertID]);

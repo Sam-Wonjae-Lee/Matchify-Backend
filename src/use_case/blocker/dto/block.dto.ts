@@ -1,9 +1,9 @@
-import { IsInt } from 'class-validator';
+import { IsInt, IsString } from 'class-validator';
 
 export class BlockDto {
-  @IsInt()
-  readonly user_id: number;
+  @IsString()
+  readonly user_id: string;
 
-  @IsInt()
-  readonly blocked_user_id: number;
+  @IsString()
+  readonly blocked_user_id: string;
 }

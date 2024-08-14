@@ -1,8 +1,8 @@
-import { IsBoolean, IsInt } from "class-validator";
+import { IsBoolean, IsInt, IsString } from "class-validator";
 
 export class SettingsDto {
-  @IsInt()
-  readonly userid: number;
+  @IsString()
+  readonly userid: string;
 
   @IsBoolean()
   readonly darkMode: boolean;

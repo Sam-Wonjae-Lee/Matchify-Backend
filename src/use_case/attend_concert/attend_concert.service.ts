@@ -16,7 +16,7 @@ export class AttendConcertService {
         this.databaseService.remove_user_from_concert(userID, concertID);
     }
 
-    is_user_attending_concert(userID: number, concertID: string) {
+    is_user_attending_concert(userID: string, concertID: string) {
         return this.databaseService.is_user_attending_concert(userID, concertID);
     }
 }

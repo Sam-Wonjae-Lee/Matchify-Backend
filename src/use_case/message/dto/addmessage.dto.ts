@@ -4,8 +4,8 @@ export class AddMessageDto {
   @IsInt()
   messageID: number;
 
-  @IsInt()
-  userID: number;
+  @IsString()
+  userID: string;
 
   @IsInt()
   threadID: number;
