@@ -20,15 +20,15 @@ export class SpotifyService {
     this.redirectURI = process.env.SPOTIFY_REDIRECT_URI;
   }
 
+
+  
   /**
-   * Retrieves the access token. The access token is a string which contains the credentials and permissions that can be used to access resources.
-   * The access token is valid for 1 hour. After that time, the token expires and you need to request a new one.
-   * More info is located here: https://developer.spotify.com/documentation/web-api/concepts/access-token
-   * @return Temporary access token in JSON Format
+   * Get the current user's profile. In other words, get detailed profile information about the current user.
+   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile
+   * @param accessToken
+   * @returns A JSONObject containing the response data for the Spotify user.
    */
-
   public async getMyUserInfo(accessToken: string): Promise<any> {
-
     const response = await fetch("https://api.spotify.com/v1/me", {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -47,6 +47,12 @@ export class SpotifyService {
     return await this.databaseService.addUserInfo(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender);
   }
 
+  /**
+   * Retrieves the access token. The access token is a string which contains the credentials and permissions that can be used to access resources.
+   * The access token is valid for 1 hour. After that time, the token expires and you need to request a new one.
+   * More info is located here: https://developer.spotify.com/documentation/web-api/concepts/access-token
+   * @return Temporary access token in JSON Format
+   */
   public async authenticateCode(code: string) {
     const response = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',   // For creating resources
@@ -91,9 +97,10 @@ export class SpotifyService {
   }
 
   /**
-   * Get the user's profile. In other words, get detailed profile information about the user.
-   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile
+   * Get the any user's profile. Not to be confused with @see getMyUserInfo
+   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-users-profile
    * @param userId A string containing the Spotify user ID.
+   * @param accessToken
    * @returns A JSONObject containing the response data for the Spotify user.
    */
   public async getUserInfo(userId: string, accessToken: string): Promise<any> {

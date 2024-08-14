@@ -1,13 +1,18 @@
+/**
+ * For manipulating values in database
+ */
+
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { Pool } from 'pg';
 // import { escape } from 'querystring';
 // import { Interface } from 'readline';
+const dotenv = require('dotenv');
+dotenv.config();
 
 
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
   private pool: Pool;
-
   constructor() {
     this.pool = new Pool({
       host: process.env.DB_HOST,
@@ -20,6 +25,36 @@ export class DatabaseService implements OnModuleDestroy {
 
   async onModuleDestroy() {
     await this.pool.end();
+  }
+  
+  async add_user_info(user_id: string, username: string, first_name: string, last_name: string, location: string, dob: Date, bio: string, email: string, gender: string, profile_pic: string, favourite_playlist: string) {
+    let client;
+    try {
+      client = await this.pool.connect();
+      const res = await client.query(
+        'INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *',
+        [
+          user_id,
+          username,
+          first_name,
+          last_name,
+          location,
+          dob,
+          bio,
+          email,
+          gender,
+          profile_pic,
+          favourite_playlist
+        ]
+      );
+      return res.rows[0];
+    } catch (error) {
+      throw error;
+    } finally {
+      if(client){
+        client.release();
+      }
+    }
   }
 
   async addAccessRefreshToken(user: number, access_token: string, refresh_token: string) {
@@ -204,12 +239,20 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // sends friend request
-  async send_friend_request(senderID: number, receiverID: number) {
+  async send_friend_request(sender_id: string, receiver_id: string) {
     const client = await this.pool.connect();
+    
+    // did this to comply with the database constraint for friends
+    let user_id1 = sender_id;
+    let user_id2 = receiver_id;
+    if (receiver_id < sender_id){
+      user_id1 = receiver_id;
+      user_id2 = sender_id;
+    }
     try {
       const res = await client.query(
-        'INSERT INTO friendrequest VALUES ($1, $2) RETURNING *',
-        [senderID, receiverID],
+        'INSERT INTO friend_request VALUES ($1, $2) RETURNING *',
+        [user_id1, user_id2],
       );
       console.log(res.rows);
       return res;
@@ -221,21 +264,25 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // adds sender to receiver's friend list and remove the request from the inbox
-  async acceptFriendRequest(receiver_id: number, sender_id: number) {
+  async acceptFriendRequest(receiver_id: string, sender_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     // did this to comply with the database constraint for friends
-    const userid1 = Math.min(receiver_id, sender_id);
-    const userid2 = Math.min(receiver_id, sender_id);
+    let user_id1 = sender_id;
+    let user_id2 = receiver_id;
+    if (receiver_id < sender_id){
+      user_id1 = receiver_id;
+      user_id2 = sender_id;
+    }
     try {
       const insertFriend = await client.query(
         'INSERT INTO friends (receiver, sender) VALUES ($1, $2) RETURNING *',
-        [userid1, userid2]
+        [user_id1, user_id2]
       );
       console.log(insertFriend.rows);
       const deleteRequest = await client.query(
         'DELETE FROM friendrequest WHERE receiver = $1 AND sender = $2 RETURNING *',
-        [receiver_id, sender_id]
+        [user_id2, user_id1]
       );
       console.log(deleteRequest.rows);
       return {
@@ -250,13 +297,21 @@ export class DatabaseService implements OnModuleDestroy {
   }
 
   // remove sender's request from receiver's inbox
-  async declineFriendRequest(receiver_id: number, sender_id: number) {
+  async declineFriendRequest(receiver_id: string, sender_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
+
+    // did this to comply with the database constraint for friends
+    let user_id1 = sender_id;
+    let user_id2 = receiver_id;
+    if (receiver_id < sender_id){
+      user_id1 = receiver_id;
+      user_id2 = sender_id;
+    }
     try {
       const deleteRequest = await client.query(
         'DELETE FROM friendrequest WHERE receiver = $1 AND sender = $2 RETURNING *',
-        [receiver_id, sender_id]
+        [user_id2, user_id1]
       );
       console.log(deleteRequest.rows);
       return deleteRequest;
@@ -359,10 +414,19 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  async unsend_friend_request(senderID: number, receiverID: number) {
+  async unsend_friend_request(sender_id: string, receiver_id: string) {
         const client = await this.pool.connect();
+        
+        
+        // did this to comply with the database constraint for friends
+        let user_id1 = sender_id;
+        let user_id2 = receiver_id;
+        if (receiver_id < sender_id){
+          user_id1 = receiver_id;
+          user_id2 = sender_id;
+        } 
         try {
-            const res = await client.query("DELETE FROM friendrequest WHERE sender = $1 AND receiver = $2 RETURNING *", [senderID, receiverID]);
+            const res = await client.query("DELETE FROM friendrequest WHERE sender = $1 AND receiver = $2 RETURNING *", [user_id1, user_id2]);
             console.log(res.rows);
         return res;
         } 
