@@ -1,3 +1,7 @@
+/**
+ * For manipulating values in database
+ */
+
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { Pool } from 'pg';
 // import { escape } from 'querystring';
