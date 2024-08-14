@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-import { Injectable, OnModuleDestroy, Logger } from '@nestjs/common';
-=======
 /**
  * For manipulating values in database
  */
 
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
->>>>>>> 1b48f79e15f7594a111efa3b1e1c234864d7dc84
 import { Pool } from 'pg';
 // import { escape } from 'querystring';
 // import { Interface } from 'readline';
@@ -15,7 +11,6 @@ import { Pool } from 'pg';
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
   private pool: Pool;
-  private readonly logger = new Logger(DatabaseService.name);
   constructor() {
     this.pool = new Pool({
       host: process.env.DB_HOST,
@@ -55,7 +50,6 @@ export class DatabaseService implements OnModuleDestroy {
       );
       return res.rows[0];
     } catch (error) {
-      this.logger.error('Error adding user info', error.stack);
       throw error;
     } finally {
       if(client){
