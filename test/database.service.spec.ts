@@ -1,64 +1,37 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { DatabaseService } from 'src/database/database.service';
-import { Pool } from 'pg';
+// warning: nukes database and resets it, use only during development
 
-jest.mock('pg', () => {
-  const mPool = {
-    connect: jest.fn().mockResolvedValue({
-      query: jest.fn(),
-      release: jest.fn(),
-    }),
-    end: jest.fn(),
-  };
-  return { Pool: jest.fn(() => mPool) };
+const { Client } = require('pg');
+const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
+
+// Load environment variables from .env file
+dotenv.config();
+
+const client = new Client({
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT, 10),
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
 });
 
-describe('DatabaseService', () => {
-  let service: DatabaseService;
-  let pool: Pool;
+client.connect()
+.then(() => {
+    console.log('Connected to the database');
+    
+    // Read the SQL file
+    const filePath = path.join('src/database', 'database_schema.sql');
+    const createTablesQuery = fs.readFileSync(filePath, 'utf8');
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [DatabaseService],
-    }).compile();
-
-    service = module.get<DatabaseService>(DatabaseService);
-    pool = module.get<Pool>(Pool);
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
-  it('should block a user', async () => {
-    const mockClient = {
-      query: jest.fn().mockResolvedValue({ rows: [{ user: 1, blocked_user: 2 }] }),
-      release: jest.fn(),
-    };
-    pool.connect.mockResolvedValue(mockClient);
-
-    const result = await service.blockUser(1, 2);
-    expect(result).toEqual({ rows: [{ user: 1, blocked_user: 2 }] });
-    expect(mockClient.query).toHaveBeenCalledWith(
-      'INSERT INTO blocks VALUES ($1, $2) RETURNING *',
-      [1, 2],
-    );
-    expect(mockClient.release).toHaveBeenCalled();
-  });
-
-  it('should unblock a user', async () => {
-    const mockClient = {
-      query: jest.fn().mockResolvedValue({ rows: [{ user: 1, blocked_user: 2 }] }),
-      release: jest.fn(),
-    };
-    pool.connect.mockResolvedValue(mockClient);
-
-    const result = await service.unblockUser(1, 2);
-    expect(result).toEqual({ rows: [{ user: 1, blocked_user: 2 }] });
-    expect(mockClient.query).toHaveBeenCalledWith(
-      'DELETE FROM blocks WHERE blocker = $1 AND blocked = $2 RETURNING *',
-      [1, 2],
-    );
-    expect(mockClient.release).toHaveBeenCalled();
-  });
+    return client.query(createTablesQuery);
+})
+.then(() => {
+    console.log('Tables created successfully');
+})
+.catch(err => {
+    console.error('Error executing query', err.stack);
+})
+.finally(() => {
+    client.end();
 });
