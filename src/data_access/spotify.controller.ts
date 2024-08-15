@@ -21,6 +21,7 @@ export class SpotifyController {
     return this.spotifyService.getAuthUrl();
   }
 
+  // Send data to backend from frontend
   @Post('auth/callback')
   async authenticateCode(@Body('code') code: string) {
     const response = await this.spotifyService.authenticateCode(code);
