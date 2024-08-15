@@ -27,7 +27,7 @@ export class DatabaseService implements OnModuleDestroy {
     await this.pool.end();
   }
 
-  async addAccessRefreshToken(user: number, access_token: string, refresh_token: string) {
+  async addAccessRefreshToken(user: string, access_token: string, refresh_token: string) {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
@@ -46,14 +46,32 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  async getUser(user: number) {
+  async getUserAccessToken(user: string) {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
-        'SELECT FROM users WHERE user_id = $1',
+        'SELECT access_token FROM tokens WHERE user_id = $1',
         [user],
       );
-      return res.rows;
+      if (res.rows.length > 0) {
+        return res.rows[0].access_token;
+      }
+      return null;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUser(user: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT * FROM users WHERE user_id = $1',
+        [user],
+      );
+      return res.rows[0];
     } catch (e) {
       console.log(e);
     } finally {

@@ -11,10 +11,10 @@ export class SpotifyController {
   //   return this.spotifyService.getUserInfo(id);
   // }
 
-  // @Get('user/:id/playlists')
-  // async getUserPlaylists(@Param('id') id: string) {
-  //   return this.spotifyService.getUserPlaylists(id);
-  // }
+  @Get('user/:id/playlists')
+  async getUserPlaylists(@Param('id') id: string) {
+    return this.spotifyService.getUserPlaylists(id);
+  }
 
   @Get('auth')
   async getAuthUrl() {
@@ -28,8 +28,8 @@ export class SpotifyController {
   }
 
   @Post('auth/create')
-  async createAccount(@Body('user_id') user_id: string, @Body('username') username: string, @Body('first_name') first_name: string, @Body('last_name') last_name: string, @Body('location') location: string, @Body('dob') dob: Date, @Body('bio') bio: string, @Body('email') email: string, @Body('profile_pic') profile_pic: string, @Body('favourite_playlist') favourite_playlist: string, @Body('gender') gender: string) {
-    const response = await this.spotifyService.createAccount(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender);
+  async createAccount(@Body('user_id') user_id: string, @Body('username') username: string, @Body('first_name') first_name: string, @Body('last_name') last_name: string, @Body('location') location: string, @Body('dob') dob: Date, @Body('bio') bio: string, @Body('email') email: string, @Body('profile_pic') profile_pic: string, @Body('favourite_playlist') favourite_playlist: string, @Body('gender') gender: string, @Body('access_token') access_token: string, @Body('refresh_token') refresh_token: string) {
+    const response = await this.spotifyService.createAccount(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender, access_token, refresh_token);
     return response;
   }
 }

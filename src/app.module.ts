@@ -14,6 +14,7 @@ import { TicketMasterModule } from './data_access/TicketMaster/TicketMaster.modu
 import { ThreadModule } from './use_case/thread/thread.module';
 import { ConcertSearchingModule } from './use_case/concert_searching/concert_searching.module';
 import { AttendConcertModule } from './use_case/attend_concert/attend_concert.module';
+import { UserModule } from './use_case/user/user.module';
 
 
 @Module({
@@ -28,7 +29,8 @@ import { AttendConcertModule } from './use_case/attend_concert/attend_concert.mo
     TicketMasterModule,
     ThreadModule,
     ConcertSearchingModule,
-    AttendConcertModule
+    AttendConcertModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],
