@@ -78,7 +78,7 @@ export class SpotifyService {
     if (user.length > 0) {
       isCreation = false;
       // if user exists we update our db with latest spotify data
-      this.databaseService.updateUserInfo({user_id: profileData.id, username: profileData.display_name, email: profileData.email, profile_pic: profileData.images[0].url})
+      this.databaseService.updateUserInfo({user_id: profileData.id, username: profileData.display_name, email: profileData.email, profile_pic: profileData.images[1].url})
     }
     await this.databaseService.addAccessRefreshToken(profileData.id, data.access_token, data.refresh_token);
     console.log(data);
