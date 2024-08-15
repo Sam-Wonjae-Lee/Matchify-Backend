@@ -10,7 +10,7 @@ export class TicketMasterService {
     }
 
     // Get a list of upcoming concerts in a given country
-    public async get_upcoming_concerts(time_range_start: string, time_range_end: string): Promise<any> {
+    public async update_with_upcoming_concerts(time_range_start: string, time_range_end: string): Promise<any> {
         // Preconditions: country must be a valid country code, time_range_start and time_range_end must be ISO 8601 format.
 
         const url = 'https://app.ticketmaster.com/discovery/v2/events.json';
@@ -23,6 +23,7 @@ export class TicketMasterService {
             endDateTime: time_range_end,
             size: '10'  // Adjust the size to get more or fewer events per request
         });
+
 
         const response = await fetch(`${url}?${params.toString()}`);
 

@@ -431,7 +431,7 @@ export class DatabaseService implements OnModuleDestroy {
       const client = await this.pool.connect();
       try {
         const res = await client.query<{ concert_count: number }>(
-          "SELECT COUNT(*) AS concert_count FROM concert WHERE concertid= $1;",
+          "SELECT COUNT(*) AS concert_count FROM concert WHERE concert_id= $1;",
           [concert_id]
         );
         return (res.rows[0].concert_count >= 1);
@@ -486,7 +486,7 @@ export class DatabaseService implements OnModuleDestroy {
     async delete_old_concerts() {
         const client = await this.pool.connect();
         try {
-            const res = await client.query("DELETE FROM concert WHERE date < NOW() RETURNING *");
+            const res = await client.query("DELETE FROM concert WHERE concert_date < NOW() RETURNING *");
             return res;
         } 
         catch (e) {
