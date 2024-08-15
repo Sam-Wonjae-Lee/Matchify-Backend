@@ -10,19 +10,18 @@ export class TicketMasterService {
     }
 
     // Get a list of upcoming concerts in a given country
-    public async get_upcoming_concerts(country: string, time_range_start: string, time_range_end: string): Promise<any> {
+    public async get_upcoming_concerts(time_range_start: string, time_range_end: string): Promise<any> {
         // Preconditions: country must be a valid country code, time_range_start and time_range_end must be ISO 8601 format.
 
         const url = 'https://app.ticketmaster.com/discovery/v2/events.json';
         // the URLSearchParams object is used to create a query string
         const params = new URLSearchParams({
             apikey: this.apiKey,
-            countryCode: country,
+            // countryCode: country,
             classificationName: 'music',
-            keyword: 'Taylor Swift',
             startDateTime: time_range_start,
             endDateTime: time_range_end,
-            size: '200'  // Adjust the size to get more or fewer events per request
+            size: '10'  // Adjust the size to get more or fewer events per request
         });
 
         const response = await fetch(`${url}?${params.toString()}`);
@@ -94,8 +93,8 @@ export class TicketMasterService {
             }));
 
             // Add upcoming concerts to the database
-            // this.databaseService.delete_old_concerts();
-            // this.databaseService.update_concerts(events);
+            this.databaseService.delete_old_concerts();
+            this.databaseService.update_concerts(events);
 
             return events.map((event) => ({
                 id: event.concert_id,
