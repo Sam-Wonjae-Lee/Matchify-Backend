@@ -560,18 +560,19 @@ export class DatabaseService implements OnModuleDestroy {
         date: Date;
         image: string;
         venue: string;
+        genre: string;
     }[]) {
         const client = await this.pool.connect();
         try {
             for (let concert of concert_list) {
                 // check if concert already exists
                 if (await this._check_concert(concert.concert_id)) {
-                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", [concert.concert_id, concert.name, concert.location, 
-                    concert.url, concert.image, concert.venue, concert.date]);
-                    console.log(concert);
+                  console.log("concert already exists");
                 }
                 else {
-                  console.log("concert already exists");
+                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *", 
+                      [concert.concert_id, concert.name, concert.location, concert.url, concert.image, concert.venue, concert.date, concert.genre]);
+                    console.log(concert);
                 }
 
         }
