@@ -1,4 +1,5 @@
 import { Injectable, HttpException, Redirect } from '@nestjs/common';
+import { off } from 'process';
 import { DatabaseService } from 'src/database/database.service';
 
 export interface ProfileObject {
@@ -185,5 +186,83 @@ export class SpotifyService {
     return response.json();
   }
 
-  
+ /**
+  * Get the user's top tracks.
+  * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
+  * @param accessToken A string containing the Spotify access token.
+  * @return A JSONObject containing the response data for the user's top tracks.
+  * */
+  public async getUserTopTracks(
+    accessToken: string, 
+    timeRange: 'short_term' | 'medium_term' | 'long_term' = 'long_term',  // Set 'long_term' as default 
+    limit: number = 0, 
+    offset: number = 0
+  ): Promise<any> {
+    // Limit is the max number of items returned and offset determines the index of the first item returned
+    const response = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=${limit}&offset=${offset}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to retrieve user's top tracks`);
+    }
+
+    return response.json();
+  }
+
+  /**
+  * Get the user's top artists.
+  * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
+  * @param accessToken A string containing the Spotify access token.
+  * @return A JSONObject containing the response data for the user's top artists.
+  * */
+  public async getUserTopArtists(
+    accessToken: string,
+    timeRange: 'short_term' | 'medium_term' | 'long_term' = 'long_term',  // Set 'long_term' as default 
+    limit: number = 0,
+    offset: number = 0
+  ): Promise<any> {
+    // Limit is the max number of items returned and offset determines the index of the first item returned
+    const response = await fetch(`https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}&limit=${limit}&offset=${offset}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to retrieve user's top artists`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Count the occurrences of each genre in the user's top artists.
+   * @param accessToken A string containing the Spotify access token.
+   * @return An object with genres as keys and their counts as values.
+   */
+  public async getUserCountGenres(
+    accessToken: string,
+    timeRange: 'short_term' | 'medium_term' | 'long_term' = 'long_term',  // Set 'long_term' as default 
+    limit: number = 0,
+    offset: number = 0
+  ): Promise<{ [genre: string]: number }> {
+
+    const data = await this.getUserTopArtists(accessToken, timeRange, limit, offset);
+    const genreCounts: { [genre: string]: number } = {};
+
+    data.items.forEach((artist: any) => {
+      artist.genres.forEach((genre: string) => {
+        if (genreCounts[genre]) {
+          genreCounts[genre]++;
+        } else {
+          genreCounts[genre] = 1;
+        }
+      });
+    });
+
+    return genreCounts;
+  }
 }
