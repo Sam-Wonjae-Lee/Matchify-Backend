@@ -43,8 +43,10 @@ export class SpotifyService {
     return data;
   }
 
-  public async createAccount(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender) {
-    return await this.databaseService.addUserInfo(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender);
+  public async createAccount(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender, access_token, refresh_token) {
+    const insertionData = await this.databaseService.addUserInfo(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender);
+    await this.databaseService.addAccessRefreshToken(user_id, access_token, refresh_token);
+    return insertionData
   }
 
   /**
@@ -75,15 +77,15 @@ export class SpotifyService {
     const profileData = await this.getMyUserInfo(data.access_token);
     const user = await this.databaseService.getUser(profileData.id);
     let isCreation = true;
-    if (user.length > 0) {
+    if (user) {
       isCreation = false;
       // if user exists we update our db with latest spotify data
       this.databaseService.updateUserInfo({user_id: profileData.id, username: profileData.display_name, email: profileData.email, profile_pic: profileData.images[1].url})
+      await this.databaseService.addAccessRefreshToken(profileData.id, data.access_token, data.refresh_token);
     }
-    await this.databaseService.addAccessRefreshToken(profileData.id, data.access_token, data.refresh_token);
-    console.log(data);
+    console.log(data.access_token);
     console.log(profileData);
-    return {profileData, isCreation};
+    return {profileData, isCreation, accessToken: data.access_token, refreshToken: data.refresh_token};
   }
 
   /**
@@ -124,7 +126,9 @@ export class SpotifyService {
    * @param userId A string containing the Spotify user ID.
    * @return A JSONObject containing the response data for the user's playlist.
    * */
-  public async getUserPlaylists(userId: string, accessToken: string): Promise<any> {
+  public async getUserPlaylists(userId: string): Promise<any> {
+
+    const accessToken = await this.databaseService.getUserAccessToken(userId);
 
     const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
       headers: {
@@ -136,7 +140,9 @@ export class SpotifyService {
     //     throw new HttpException('Failed to retrieve playlist info', response.status);
     // }
   
-    return response.json();
+    const data = await response.json();
+    console.log(data);
+    return data;
   }
 
   /**
