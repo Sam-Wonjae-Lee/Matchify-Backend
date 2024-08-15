@@ -11,18 +11,43 @@ export class SettingsController {
     return this.SettingsService.create(SettingsDto);
   }
 
+  @Post('/options')
+  options(@Body() SettingsDto: SettingsDto) {
+    return this.SettingsService.options(SettingsDto);
+  }
+
   @Post('/dark_mode')
   dark_mode(@Body() SettingsDto: SettingsDto) {
     return this.SettingsService.dark_mode(SettingsDto);
   }
 
-  @Post('/private')
-  private(@Body() SettingsDto: SettingsDto) {
-    return this.SettingsService.private(SettingsDto);
+  @Post('/friend_message')
+  friend_message(@Body() SettingsDto: SettingsDto) {
+    return this.SettingsService.friend_message(SettingsDto);
   }
 
-  @Post('/notification')
-  notification(@Body() SettingsDto: SettingsDto) {
-    return this.SettingsService.notification(SettingsDto);
+  @Post('/friend_visibility')
+  friend_visibility(@Body() SettingsDto: SettingsDto) {
+    return this.SettingsService.friend_visibility(SettingsDto);
+  }
+
+  @Post('/friend_request')
+  friend_request(@Body() SettingsDto: SettingsDto) {
+    return this.SettingsService.friend_request(SettingsDto);
+  }
+
+  @Post('/playlist_update')
+  playlist_update(@Body() SettingsDto: SettingsDto) {
+    return this.SettingsService.playlist_update(SettingsDto);
+  }
+
+  @Post('/new_events')
+  new_events(@Body() SettingsDto: SettingsDto) {
+    return this.SettingsService.new_events(SettingsDto);
+  }
+
+  @Post('/event_reminder')
+  event_reminder(@Body() SettingsDto: SettingsDto) {
+    return this.SettingsService.event_reminder(SettingsDto);
   }
 }
