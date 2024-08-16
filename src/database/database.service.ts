@@ -328,25 +328,47 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  // update darkMode setting for user
-  async update_darkMode(userid: string) {
+  // Update options setting for user
+  async update_options(user_id: string) {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT options FROM settings WHERE user_id = $1',
+        [user_id]
+      );
+      const currentOptions = result.rows[0].options.valueOf();
+      const newOptions = !currentOptions;
+      const updateOptions = await client.query(
+        'UPDATE settings SET options = $1 WHERE user_id = $2 RETURNING *',
+        [newOptions, user_id]
+      );
+      return updateOptions.rows[0];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  // Update dark_mode setting for user
+  async update_dark_mode(user_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
       const result = await client.query(
-        'SELECT darkMode FROM settings WHERE userid = $1',
-        [userid]
+        'SELECT dark_mode FROM settings WHERE user_id = $1',
+        [user_id]
       );
-      const currentDarkMode = result.rows[0].darkmode.valueOf();
+      const currentDarkMode = result.rows[0].dark_mode.valueOf();
       console.log(currentDarkMode);
       const newDarkMode = !currentDarkMode;
       console.log(newDarkMode);
-      const update_darkMode = await client.query(
-        'UPDATE settings SET darkMode = $1 WHERE userid = $2 RETURNING *',
-        [newDarkMode, userid]
+      const updateDarkMode = await client.query(
+        'UPDATE settings SET dark_mode = $1 WHERE user_id = $2 RETURNING *',
+        [newDarkMode, user_id]
       );
-      console.log(update_darkMode.rows);
-      return update_darkMode.rows[0];
+      console.log(updateDarkMode.rows);
+      return updateDarkMode.rows[0];
     } catch (e) {
       console.log(e);
     } finally {
@@ -354,23 +376,21 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  // update private setting for user
-  async update_private(userid: string) {
-    console.log(process.env.DB_PASSWORD as string);
+  // Update friend_message setting for user
+  async update_friend_message(user_id: string) {
     const client = await this.pool.connect();
     try {
       const result = await client.query(
-        'SELECT private FROM settings WHERE userid = $1',
-        [userid]
+        'SELECT friend_message FROM settings WHERE user_id = $1',
+        [user_id]
       );
-      const currentPrivateMode = result.rows[0].private.valueOf();
-      const newPrivateMode = !currentPrivateMode;
-      const update_private = await client.query(
-        'UPDATE settings SET private = $1 WHERE userid = $2 RETURNING *',
-        [newPrivateMode, userid]
+      const currentFriendMessage = result.rows[0].friend_message.valueOf();
+      const newFriendMessage = !currentFriendMessage;
+      const updateFriendMessage = await client.query(
+        'UPDATE settings SET friend_message = $1 WHERE user_id = $2 RETURNING *',
+        [newFriendMessage, user_id]
       );
-      console.log(update_private.rows);
-      return update_private.rows[0];
+      return updateFriendMessage.rows[0];
     } catch (e) {
       console.log(e);
     } finally {
@@ -378,29 +398,116 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  // update notification setting for user
-  async update_notification(userid: string) {
-    console.log(process.env.DB_PASSWORD as string);
+  // Update friend_visibility setting for user
+  async update_friend_visibility(user_id: string) {
     const client = await this.pool.connect();
     try {
       const result = await client.query(
-        'SELECT notification FROM settings WHERE userid = $1',
-        [userid]
+        'SELECT friend_visibility FROM settings WHERE user_id = $1',
+        [user_id]
       );
-      const currentNotification = result.rows[0].notification.valueOf();
-      const newNotification = !currentNotification;
-      const update_notification = await client.query(
-        'UPDATE settings SET notification = $1 WHERE userid = $2 RETURNING *',
-          [newNotification, userid]
+      const currentFriendVisibility = result.rows[0].friend_visibility.valueOf();
+      const newFriendVisibility = !currentFriendVisibility;
+      const updateFriendVisibility = await client.query(
+        'UPDATE settings SET friend_visibility = $1 WHERE user_id = $2 RETURNING *',
+        [newFriendVisibility, user_id]
       );
-      console.log(update_notification.rows);
-      return update_notification.rows[0];
+      return updateFriendVisibility.rows[0];
     } catch (e) {
       console.log(e);
     } finally {
       client.release();
     }
   }
+
+  // Update friend_request setting for user
+  async update_friend_request(user_id: string) {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT friend_request FROM settings WHERE user_id = $1',
+        [user_id]
+      );
+      const currentFriendRequest = result.rows[0].friend_request.valueOf();
+      const newFriendRequest = !currentFriendRequest;
+      const updateFriendRequest = await client.query(
+        'UPDATE settings SET friend_request = $1 WHERE user_id = $2 RETURNING *',
+        [newFriendRequest, user_id]
+      );
+      return updateFriendRequest.rows[0];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  // Update playlist_update setting for user
+  async update_playlist_update(user_id: string) {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT playlist_update FROM settings WHERE user_id = $1',
+        [user_id]
+      );
+      const currentPlaylistUpdate = result.rows[0].playlist_update.valueOf();
+      const newPlaylistUpdate = !currentPlaylistUpdate;
+      const updatePlaylistUpdate = await client.query(
+        'UPDATE settings SET playlist_update = $1 WHERE user_id = $2 RETURNING *',
+        [newPlaylistUpdate, user_id]
+      );
+      return updatePlaylistUpdate.rows[0];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  // Update new_events setting for user
+  async update_new_events(user_id: string) {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT new_events FROM settings WHERE user_id = $1',
+        [user_id]
+      );
+      const currentNewEvents = result.rows[0].new_events.valueOf();
+      const newNewEvents = !currentNewEvents;
+      const updateNewEvents = await client.query(
+        'UPDATE settings SET new_events = $1 WHERE user_id = $2 RETURNING *',
+        [newNewEvents, user_id]
+      );
+      return updateNewEvents.rows[0];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  // Update event_reminder setting for user
+  async update_event_reminder(user_id: string) {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT event_reminder FROM settings WHERE user_id = $1',
+        [user_id]
+      );
+      const currentEventReminder = result.rows[0].event_reminder.valueOf();
+      const newEventReminder = !currentEventReminder;
+      const updateEventReminder = await client.query(
+        'UPDATE settings SET event_reminder = $1 WHERE user_id = $2 RETURNING *',
+        [newEventReminder, user_id]
+      );
+      return updateEventReminder.rows[0];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
 
   async unsend_friend_request(sender_id: string, receiver_id: string) {
         const client = await this.pool.connect();
@@ -453,18 +560,19 @@ export class DatabaseService implements OnModuleDestroy {
         date: Date;
         image: string;
         venue: string;
+        genre: string;
     }[]) {
         const client = await this.pool.connect();
         try {
             for (let concert of concert_list) {
                 // check if concert already exists
                 if (await this._check_concert(concert.concert_id)) {
-                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *", [concert.concert_id, concert.name, concert.location, 
-                    concert.url, concert.image, concert.venue, concert.date]);
-                    console.log(concert);
+                  console.log("concert already exists");
                 }
                 else {
-                  console.log("concert already exists");
+                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *", 
+                      [concert.concert_id, concert.name, concert.location, concert.url, concert.image, concert.venue, concert.date, concert.genre]);
+                    console.log(concert);
                 }
 
         }
