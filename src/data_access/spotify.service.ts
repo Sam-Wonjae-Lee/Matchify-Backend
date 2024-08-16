@@ -129,7 +129,11 @@ export class SpotifyService {
    * */
   public async getUserPlaylists(userId: string): Promise<any> {
 
+    console.log(userId);
+
     const accessToken = await this.databaseService.getUserAccessToken(userId);
+
+    console.log(accessToken);
 
     const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists`, {
       headers: {
@@ -152,9 +156,13 @@ export class SpotifyService {
    * @param playlistId A string containing the Spotify playlist ID.
    * @return A JSONObject containing the response data for playlist.
    * */
-  public async getPlaylistItems(playlistId: string, accessToken: string): Promise<any> {
+  public async getPlaylistItems(playlistId: string, userId: string, limit: number, offset: number): Promise<any> {
 
-    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+    const accessToken = await this.databaseService.getUserAccessToken(userId);
+
+    console.log(accessToken);
+
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
       },
@@ -162,8 +170,8 @@ export class SpotifyService {
     // if (!response.ok) {
     //     throw new HttpException('Failed to retrieve playlist info', response.status);
     // }
-
-    return response.json();
+    const data = await response.json();
+    return data;
   }
 
   /**
