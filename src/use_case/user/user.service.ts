@@ -9,4 +9,8 @@ export class UserService {
     async getUser(user: string) {
         return await this.databaseService.getUser(user);
     }
+
+    async getUserFriends(user: string){
+        return await this.databaseService.getUserFriends(user);
+    }
 }

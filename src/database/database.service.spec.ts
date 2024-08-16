@@ -42,4 +42,19 @@ describe('DatabaseService (Integration)', () => {
     const result2 = await pool.query('SELECT * FROM users WHERE user_id = $1', ['b']);
     expect(result2.rows.length).toBe(1);
   });
+  it('users send friends requests', async () => {
+    await service.send_friend_request('b','a');
+    const result1 = await pool.query('SELECT * FROM friend_request WHERE sender = $1 AND receiver = $2', ['a', 'b']);
+    expect(result1.rows.length).toBe(1);
+  });
+  it('users accept friends requests', async () => {
+    // check if the friend request is deleted
+    await service.acceptFriendRequest('b','a');
+    const result1 = await pool.query('SELECT * FROM friend_request WHERE sender = $1 AND receiver = $2', ['a', 'b']);
+    expect(result1.rows.length).toBe(0);
+    // check if the friend is added
+    const result2 = await pool.query('SELECT * FROM friends WHERE user1 = $1 AND user2 = $2', ['a', 'b']);
+    expect(result2.rows.length).toBe(1);
+  });
+  
 });
