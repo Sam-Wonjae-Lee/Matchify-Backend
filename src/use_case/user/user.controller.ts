@@ -16,4 +16,10 @@ export class UserController {
         const {bio, location, gender, fav_playlist, dob} = postUserDto;
         return this.userService.updateUser(id, bio, location, gender, fav_playlist, dob);
     }
+  
+    @Get('/get_user_friends/:id')
+    async getUserFriends(@Param('id') id: string) {
+        return this.userService.getUserFriends(id);
+
+    }
 }
