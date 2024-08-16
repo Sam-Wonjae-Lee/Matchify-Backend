@@ -11,8 +11,14 @@ export class SpotifyController {
   //   return this.spotifyService.getUserInfo(id);
   // }
 
+  @Post('playlists/:id/tracks')
+  async getPlaylistItems(@Param('id') id: string, @Body('user_id') user_id: string, @Body('limit') limit: number, @Body('offset') offset: number) {
+    return this.spotifyService.getPlaylistItems(id, user_id, limit, offset);
+  }
+
   @Get('user/:id/playlists')
   async getUserPlaylists(@Param('id') id: string) {
+    console.log(id);
     return this.spotifyService.getUserPlaylists(id);
   }
 
