@@ -450,7 +450,7 @@ export class DatabaseService implements OnModuleDestroy {
         name: string;
         location: string;
         url: string;
-        date: Date;
+        date: string;
         image: string;
         venue: string;
         genre: string;
@@ -464,7 +464,7 @@ export class DatabaseService implements OnModuleDestroy {
                 }
                 else {
                     const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *", 
-                      [concert.concert_id, concert.name, concert.location, concert.url, concert.image, concert.venue, concert.date, concert.genre]);
+                      [concert.concert_id, concert.name, concert.location, concert.image, concert.date, concert.url, concert.venue, concert.genre]);
                     console.log(concert);
                 }
 
@@ -486,7 +486,10 @@ export class DatabaseService implements OnModuleDestroy {
     async delete_old_concerts() {
         const client = await this.pool.connect();
         try {
-            const res = await client.query("DELETE FROM concert WHERE concert_date < NOW() RETURNING *");
+            // const res = await client.query("DELETE FROM concert WHERE concert_date < NOW() RETURNING *");
+            const res = await client.query("SELECT concert_date FROM concert");
+            console.log(res.rows);
+
             return res;
         } 
         catch (e) {
@@ -578,6 +581,32 @@ export class DatabaseService implements OnModuleDestroy {
         try {
             const res = await client.query("SELECT COUNT(*) FROM user_concert WHERE userID = $1 AND concertID = $2", [userID, concertID]);
             return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
+
+    // TODO: still needs alot work here
+    async get_concerts(userID: string) {
+        const client = await this.pool.connect();
+        try {
+            const favorite_artist = await client.query("SELECT favorite_artist FROM users WHERE user_id = $1", [userID]);
+            const res = await client.query("SELECT * FROM concert_artist WHERE artist_name = $1 LIMIT 8", [favorite_artist]);
+            let count = res.rows.length
+
+            // if ()
+
+            while (count < 8) {
+                const res2 = await client.query("SELECT * FROM concert");
+                res.rows.push(res2.rows[0]);
+                count++;
+            }
+            
+            return res.rows;
         } 
         catch (e) {
             console.log(e);
