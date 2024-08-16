@@ -71,7 +71,23 @@ export class DatabaseService implements OnModuleDestroy {
         'SELECT * FROM users WHERE user_id = $1',
         [user],
       );
+      console.log(res.rows[0].dob);
       return res.rows[0];
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserFriends(user: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT * FROM friends WHERE user1 = $1 OR user2 = $2',
+        [user, user],
+      );
+      return res.rows;
     } catch (e) {
       console.log(e);
     } finally {
@@ -229,7 +245,6 @@ export class DatabaseService implements OnModuleDestroy {
   // sends friend request
   async send_friend_request(sender_id: string, receiver_id: string) {
     const client = await this.pool.connect();
-    
     // did this to comply with the database constraint for friends
     let user_id1 = sender_id;
     let user_id2 = receiver_id;
@@ -242,7 +257,6 @@ export class DatabaseService implements OnModuleDestroy {
         'INSERT INTO friend_request VALUES ($1, $2) RETURNING *',
         [user_id1, user_id2],
       );
-      console.log(res.rows);
       return res;
     } catch (e) {
       console.log(e);
@@ -264,12 +278,12 @@ export class DatabaseService implements OnModuleDestroy {
     }
     try {
       const insertFriend = await client.query(
-        'INSERT INTO friends (receiver, sender) VALUES ($1, $2) RETURNING *',
+        'INSERT INTO friends (user1, user2) VALUES ($1, $2) RETURNING *',
         [user_id1, user_id2]
       );
       console.log(insertFriend.rows);
       const deleteRequest = await client.query(
-        'DELETE FROM friendrequest WHERE receiver = $1 AND sender = $2 RETURNING *',
+        'DELETE FROM friend_request WHERE receiver = $1 AND sender = $2 RETURNING *',
         [user_id2, user_id1]
       );
       console.log(deleteRequest.rows);
