@@ -9,7 +9,7 @@ export class SettingsService {
   // create user settings
   create(settingsDto: SettingsDto) {
     const { user_id} = settingsDto;
-    this.databaseService.create_userSetting (user_id);
+    this.databaseService.create_user_setting(user_id);
   }
 
   // enable and disable options

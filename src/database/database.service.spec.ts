@@ -56,5 +56,25 @@ describe('DatabaseService (Integration)', () => {
     const result2 = await pool.query('SELECT * FROM friends WHERE user1 = $1 AND user2 = $2', ['a', 'b']);
     expect(result2.rows.length).toBe(1);
   });
+  it('should flip the dark_mode value in settings', async () => {
+    const user_id = 'a'; // Set user_id to 'a'
+
+    // Initial setup: Add a setting with default boolean values
+    await service.create_user_setting(user_id);
+    
+    // Query the initial value of dark_mode
+    let result = await pool.query('SELECT dark_mode FROM settings WHERE user_id = $1', [user_id]);
+    expect(result.rows.length).toBe(1);
+    expect(result.rows[0].dark_mode).toBe(true);
+    
+    // Call the service method to flip the dark_mode value
+    await service.update_dark_mode(user_id);
+    
+    // Query the value after flipping
+    result = await pool.query('SELECT dark_mode FROM settings WHERE user_id = $1', [user_id]);
+    expect(result.rows.length).toBe(1);
+    expect(result.rows[0].dark_mode).toBe(false);
+  });
+  
   
 });

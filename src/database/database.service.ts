@@ -324,17 +324,17 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  // create user settings
-  async create_userSetting(userid: string) {
+  // Create user settings with all parameters
+  async create_user_setting(user_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
-      const create_userSetting = await client.query(
-        'INSERT INTO settings (userid, darkMode, private, notification) VALUES ($1, $2, $3, $4) RETURNING *',
-        [userid, false, false, false]
+      const create_user_setting = await client.query(
+        'INSERT INTO settings (user_id, options, dark_mode, friend_message, friend_visibility, friend_request, playlist_update, new_events, event_reminder) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+        [user_id, true, true, true, true, true, true, true, true]
       );
-      console.log(create_userSetting.rows);
-      return create_userSetting.rows[0];
+      console.log(create_user_setting.rows);
+      return create_user_setting.rows[0];
     } catch (e) {
       console.log(e);
     } finally {
