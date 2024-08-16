@@ -149,7 +149,7 @@ export class SpotifyService {
   /**
    * Get the tracks/items from a playlist. 
    * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
-   * @param userId A string containing the Spotify playlist ID.
+   * @param playlistId A string containing the Spotify playlist ID.
    * @return A JSONObject containing the response data for playlist.
    * */
   public async getPlaylistItems(playlistId: string, accessToken: string): Promise<any> {
@@ -189,15 +189,17 @@ export class SpotifyService {
  /**
   * Get the user's top tracks.
   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
-  * @param accessToken A string containing the Spotify access token.
+  * @param userId A string containing the Spotify user ID.
   * @return A JSONObject containing the response data for the user's top tracks.
   * */
   public async getUserTopTracks(
-    accessToken: string, 
+    userId: string, 
     timeRange: 'short_term' | 'medium_term' | 'long_term' = 'long_term',  // Set 'long_term' as default 
     limit: number = 0, 
     offset: number = 0
   ): Promise<any> {
+    // Get access token associated with Spotify user id from database
+    const accessToken = await this.databaseService.getUserAccessToken(userId);
     // Limit is the max number of items returned and offset determines the index of the first item returned
     const response = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=${limit}&offset=${offset}`, {
       headers: {
@@ -215,15 +217,17 @@ export class SpotifyService {
   /**
   * Get the user's top artists.
   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
-  * @param accessToken A string containing the Spotify access token.
+  * @param userId A string containing the Spotify user ID.
   * @return A JSONObject containing the response data for the user's top artists.
   * */
   public async getUserTopArtists(
-    accessToken: string,
+    userId: string,
     timeRange: 'short_term' | 'medium_term' | 'long_term' = 'long_term',  // Set 'long_term' as default 
     limit: number = 0,
     offset: number = 0
   ): Promise<any> {
+    // Get access token associated with Spotify user id from database
+    const accessToken = await this.databaseService.getUserAccessToken(userId);
     // Limit is the max number of items returned and offset determines the index of the first item returned
     const response = await fetch(`https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}&limit=${limit}&offset=${offset}`, {
       headers: {
@@ -240,17 +244,17 @@ export class SpotifyService {
 
   /**
    * Count the occurrences of each genre in the user's top artists.
-   * @param accessToken A string containing the Spotify access token.
+   * @param userId A string containing the Spotify user ID.
    * @return An object with genres as keys and their counts as values.
    */
   public async getUserTopGenres(
-    accessToken: string,
+    userId: string,
     timeRange: 'short_term' | 'medium_term' | 'long_term' = 'long_term',  // Set 'long_term' as default 
     limit: number = 0,
     offset: number = 0
   ): Promise<{ [genre: string]: number }> {
 
-    const data = await this.getUserTopArtists(accessToken, timeRange, limit, offset);
+    const data = await this.getUserTopArtists(userId, timeRange, limit, offset);
     const genreCounts: { [genre: string]: number } = {};
 
     data.items.forEach((artist: any) => {
