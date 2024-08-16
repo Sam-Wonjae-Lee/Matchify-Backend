@@ -450,7 +450,7 @@ export class DatabaseService implements OnModuleDestroy {
         name: string;
         location: string;
         url: string;
-        date: string;
+        date: Date;
         image: string;
         venue: string;
         genre: string;
@@ -486,8 +486,9 @@ export class DatabaseService implements OnModuleDestroy {
     async delete_old_concerts() {
         const client = await this.pool.connect();
         try {
-            // const res = await client.query("DELETE FROM concert WHERE concert_date < NOW() RETURNING *");
-            const res = await client.query("SELECT concert_date FROM concert");
+            const res = await client.query("DELETE FROM concert WHERE concert_date < NOW() RETURNING *");
+            // const res = await client.query("SELECT concert_date FROM concert");
+            // const res = await client.query("DELETE FROM concert RETURNING *");
             console.log(res.rows);
 
             return res;
