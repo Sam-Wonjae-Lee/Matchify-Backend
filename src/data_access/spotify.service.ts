@@ -94,7 +94,7 @@ export class SpotifyService {
    * @returns URL for Spotify Authorization
    */
   public getAuthUrl(): string {
-    const scope = 'user-read-private user-read-email'; // Permissions for authorization
+    const scope = 'user-read-private user-read-email user-top-read'; // Permissions for authorization
     const authURL = `https://accounts.spotify.com/authorize?client_id=${this.clientID}&redirect_uri=${encodeURIComponent(this.redirectURI)}&scope=${encodeURIComponent(scope)}&response_type=code`;
     return authURL;
   }
@@ -203,7 +203,7 @@ export class SpotifyService {
   public async getUserTopTracks(
     userId: string, 
     timeRange: 'short_term' | 'medium_term' | 'long_term' = 'long_term',  // Set 'long_term' as default 
-    limit: number = 0, 
+    limit: number = 5, 
     offset: number = 0
   ): Promise<any> {
     // Get access token associated with Spotify user id from database
@@ -215,8 +215,12 @@ export class SpotifyService {
       },
     });
 
+    console.log('Response status:', response.status);
+
     if (!response.ok) {
-      throw new Error(`Failed to retrieve user's top tracks`);
+      const errorText = await response.text();
+      console.error('Response error message:', errorText);
+      throw new Error(`Failed to retrieve user's top tracks: ${errorText}`);
     }
 
     return response.json();
@@ -231,7 +235,7 @@ export class SpotifyService {
   public async getUserTopArtists(
     userId: string,
     timeRange: 'short_term' | 'medium_term' | 'long_term' = 'long_term',  // Set 'long_term' as default 
-    limit: number = 0,
+    limit: number = 5,
     offset: number = 0
   ): Promise<any> {
     // Get access token associated with Spotify user id from database
@@ -258,7 +262,7 @@ export class SpotifyService {
   public async getUserTopGenres(
     userId: string,
     timeRange: 'short_term' | 'medium_term' | 'long_term' = 'long_term',  // Set 'long_term' as default 
-    limit: number = 0,
+    limit: number = 5,
     offset: number = 0
   ): Promise<{ [genre: string]: number }> {
 
