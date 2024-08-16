@@ -11,20 +11,32 @@
     <br />
     <a href="https://github.com/Sam-Wonjae-Lee/Matchify-Frontend">Frontend Repository</a>
     ·
+    <a href="https://github.com/Sam-Wonjae-Lee/Matchify-Beta">Matchify Early Version</a>
+    ·
     <a href="">View Demo</a>
     ·
     <a href="">Request Feature</a>
   </p>
 </div>
 
+<!-- Preview -->
+## Preview
+
+### Spotify User Login
+
+### Home Page
+
+### View Profile
+
+### Events Page
+
 <!-- PROJECT DESCRIPTION -->
 ## Project Description
 
-### Demo
-Show Demo Here
+
 
 ### Features
-Explain Features Here
+1. 
 
 ### Built With
 ![Next.js](https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
@@ -37,10 +49,13 @@ Explain Features Here
 
 <!-- GETTING STARTED -->
 ## Getting Started
-Give Instructions
+This is how to set up the project locally. To get a local copy running, follow the steps below.
 
 ### Prerequisites
-Ex) npm install
+
+  ```shell
+  npm install next@latest react@latest react-dom@latest
+  ```
 
 ### Installation
 Explain installing the app
@@ -48,15 +63,17 @@ Explain installing the app
 <!-- CREDITS -->
 ## Credits
 
-### Members
-Members:\
-Andy Ren - 1172097\
-Calvin Liew - Calvin-Liew\
-David Li - dvdli123\
-Frank Peng - Graves451\
-Michael Pan - Yaymichael\
-Richard Chen - Riixardo\
-Wonjae Lee - Sam-Wonjae-Lee\
-Yehyun Lee - YehyunLee
+### Contributors
+**Andy Ren** ([1172097](https://github.com/1172097)) - Frontend/Backend Developer \
+**Calvin Liew** ([Calvin-Liew](https://github.com/Calvin-Liew)) - UI/UX Designer \
+**Dmitrii Vlasov** ([Endlesssuply](https://github.com/Endlesssuply)) - Backend Developer \
+**Frank Peng** ([Graves451](https://github.com/Graves451)) - Frontend/Backend/Database Developer \
+**Michael Pan** ([Yaymichael](https://github.com/Yaymichael)) - Backend Developer \
+**Richard Chen** ([Riixardo](https://github.com/Riixardo)) - Frontend/Backend/Database Developer\
+**Wonjae (Samuel) Lee** ([Sam-Wonjae-Lee](https://github.com/Sam-Wonjae-Lee)) - Frontend/Backend Developer \
+**Yehyun Lee** ([YehyunLee](https://github.com/YehyunLee)) - Frontend/Backend Developer
 
-<!-- CONTACTS -->
+<!-- CONTACT -->
+## Contact
+For more questions or information about the project, please consult: \
+Wonjae (Samuel) Lee - wonjaesamuel.lee@mail.utoronto.ca
