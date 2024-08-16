@@ -71,6 +71,7 @@ export class DatabaseService implements OnModuleDestroy {
         'SELECT * FROM users WHERE user_id = $1',
         [user],
       );
+      console.log(res.rows[0].dob);
       return res.rows[0];
     } catch (e) {
       console.log(e);
