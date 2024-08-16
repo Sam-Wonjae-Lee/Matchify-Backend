@@ -104,7 +104,7 @@ CREATE TABLE concert (
     concert_name TEXT NOT NULL,
     concert_location TEXT NOT NULL,
     concert_image TEXT NOT NULL,
-    concert_date DATE NOT NULL,
+    concert_date TEXT NOT NULL,
     link TEXT NOT NULL,
     venue TEXT NOT NULL,
     genre TEXT NOT NULL

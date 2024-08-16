@@ -85,7 +85,7 @@ export class TicketMasterService {
                 url: event.url,
                 location: event._embedded.venues[0]?.city.name || 'Unknown City',
                 venue: event._embedded.venues[0]?.name || 'Unknown Venue',
-                date: new Date(event.dates.start.localDate),
+                date: event.dates.start.localDate,
                 image: event.images.find((image) => image.ratio === '16_9')?.url || 'No Image Available',
                 promoter: event._embedded.promoters ? event._embedded.promoters[0]?.name : 'Unknown Promoter',
                 performers: event._embedded.attractions ? event._embedded.attractions.map(attraction => attraction.name).join(', ') : 'Unknown Performers',
