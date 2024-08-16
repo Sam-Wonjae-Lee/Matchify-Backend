@@ -243,7 +243,7 @@ export class SpotifyService {
    * @param accessToken A string containing the Spotify access token.
    * @return An object with genres as keys and their counts as values.
    */
-  public async getUserCountGenres(
+  public async getUserTopGenres(
     accessToken: string,
     timeRange: 'short_term' | 'medium_term' | 'long_term' = 'long_term',  // Set 'long_term' as default 
     limit: number = 0,
