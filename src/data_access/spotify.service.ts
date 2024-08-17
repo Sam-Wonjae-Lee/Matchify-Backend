@@ -223,7 +223,9 @@ export class SpotifyService {
       throw new Error(`Failed to retrieve user's top tracks: ${errorText}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(data);
+    return data;
   }
 
   /**
@@ -251,7 +253,9 @@ export class SpotifyService {
       throw new Error(`Failed to retrieve user's top artists`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(data);
+    return data;
   }
 
   /**
