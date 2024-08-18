@@ -454,6 +454,7 @@ export class DatabaseService implements OnModuleDestroy {
         image: string;
         venue: string;
         genre: string;
+        popularity_rank: number;
     }[]) {
         const client = await this.pool.connect();
         try {
@@ -463,8 +464,8 @@ export class DatabaseService implements OnModuleDestroy {
                   console.log("concert already exists");
                 }
                 else {
-                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *", 
-                      [concert.concert_id, concert.name, concert.location, concert.image, concert.date, concert.url, concert.venue, concert.genre]);
+                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *", 
+                      [concert.concert_id, concert.name, concert.location, concert.image, concert.date, concert.url, concert.venue, concert.genre, concert.popularity_rank]);
                     console.log(concert);
                 }
 
@@ -472,6 +473,22 @@ export class DatabaseService implements OnModuleDestroy {
               // const res = await client.query("INSERT INTO concerts VALUES ($1, $2, $3, $4) RETURNING *", [concertID, concertName, concertDate, concertLocation]);
               // console.log(res.rows);
         // return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
+
+    // for testing purposes
+    async _delete_all_concerts() {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("DELETE FROM concert RETURNING *");
+            console.log(res.rows);
+            return res;
         } 
         catch (e) {
             console.log(e);
@@ -594,20 +611,27 @@ export class DatabaseService implements OnModuleDestroy {
     // TODO: still needs alot work here
     async get_concerts(userID: string) {
         const client = await this.pool.connect();
+        console.log(userID);
         try {
-            const favorite_artist = await client.query("SELECT favorite_artist FROM users WHERE user_id = $1", [userID]);
-            const res = await client.query("SELECT * FROM concert_artist WHERE artist_name = $1 LIMIT 8", [favorite_artist]);
-            let count = res.rows.length
+            // const favorite_artist = await client.query("SELECT favorite_artist FROM users WHERE user_id = $1", [userID]);
+            // const res = await client.query("SELECT * FROM concert_artist WHERE artist_name = $1 LIMIT 8", [favorite_artist]);
+            // let count = res.rows.length
+            let count = 0;
 
-            // if ()
-
-            while (count < 8) {
-                const res2 = await client.query("SELECT * FROM concert");
-                res.rows.push(res2.rows[0]);
+            // if (count < 8) {
+                let remaining = 8 - count;
+                const res = await client.query("SELECT * FROM concert WHERE concert_id NOT IN (SELECT concert_id FROM concert_artist WHERE artist_name = $1) ORDER BY popularity_rank ASC LIMIT $2", ["favorite_artist", remaining]);
+                // res.rows.push(res2.rows[0]);
                 count++;
-            }
+            // }
+
+            // while (count < 8) {
+            //     const res2 = await client.query("SELECT * FROM concert");
+            //     res.rows.push(res2.rows[0]);
+            //     count++;
+            // }
             
-            return res.rows;
+            return {concerts: res.rows, success: true};
         } 
         catch (e) {
             console.log(e);
