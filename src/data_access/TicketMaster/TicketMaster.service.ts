@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { populate } from 'dotenv';
 import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
@@ -10,7 +11,7 @@ export class TicketMasterService {
     }
 
     // Get a list of upcoming concerts in a given country
-    public async get_upcoming_concerts(time_range_start: string, time_range_end: string): Promise<any> {
+    public async update_with_upcoming_concerts(time_range_start: string, time_range_end: string): Promise<any> {
         // Preconditions: country must be a valid country code, time_range_start and time_range_end must be ISO 8601 format.
 
         const url = 'https://app.ticketmaster.com/discovery/v2/events.json';
@@ -23,6 +24,7 @@ export class TicketMasterService {
             endDateTime: time_range_end,
             size: '10'  // Adjust the size to get more or fewer events per request
         });
+
 
         const response = await fetch(`${url}?${params.toString()}`);
 
@@ -68,6 +70,7 @@ export class TicketMasterService {
                     ratio: string;
                     url: string;
                 }[];
+                rank?: number; // Add rank property
             }
         
             interface ApiResponse {
@@ -75,6 +78,11 @@ export class TicketMasterService {
                     events: Event[];
                 };
             }
+
+            // Assign ranks to events
+            data._embedded.events.forEach((event: Event, index: number) => {
+                event.rank = index + 1;
+            });
 
             // saving the eevents info into a variable
         
@@ -84,16 +92,18 @@ export class TicketMasterService {
                 url: event.url,
                 location: event._embedded.venues[0]?.city.name || 'Unknown City',
                 venue: event._embedded.venues[0]?.name || 'Unknown Venue',
-                date: new Date(event.dates.start.localDate),
+                date: event.dates.start.localDate,
                 image: event.images.find((image) => image.ratio === '16_9')?.url || 'No Image Available',
                 promoter: event._embedded.promoters ? event._embedded.promoters[0]?.name : 'Unknown Promoter',
                 performers: event._embedded.attractions ? event._embedded.attractions.map(attraction => attraction.name).join(', ') : 'Unknown Performers',
                 genre: event.classifications ? event.classifications[0]?.genre.name : 'Unknown Genre',
-                subGenre: event.classifications ? event.classifications[0]?.subGenre?.name : 'Unknown SubGenre'
+                subGenre: event.classifications ? event.classifications[0]?.subGenre?.name : 'Unknown SubGenre',
+                popularity_rank: event.rank
             }));
 
             // Add upcoming concerts to the database
-            this.databaseService.delete_old_concerts();
+            // this.databaseService.delete_old_concerts();
+            this.databaseService._delete_all_concerts();
             this.databaseService.update_concerts(events);
 
             return events.map((event) => ({

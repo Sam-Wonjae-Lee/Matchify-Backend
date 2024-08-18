@@ -552,7 +552,7 @@ export class DatabaseService implements OnModuleDestroy {
       const client = await this.pool.connect();
       try {
         const res = await client.query<{ concert_count: number }>(
-          "SELECT COUNT(*) AS concert_count FROM concert WHERE concertid= $1;",
+          "SELECT COUNT(*) AS concert_count FROM concert WHERE concert_id= $1;",
           [concert_id]
         );
         return (res.rows[0].concert_count >= 1);
@@ -571,10 +571,11 @@ export class DatabaseService implements OnModuleDestroy {
         name: string;
         location: string;
         url: string;
-        date: Date;
+        date: string;
         image: string;
         venue: string;
         genre: string;
+        popularity_rank: number;
     }[]) {
         const client = await this.pool.connect();
         try {
@@ -584,8 +585,8 @@ export class DatabaseService implements OnModuleDestroy {
                   console.log("concert already exists");
                 }
                 else {
-                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *", 
-                      [concert.concert_id, concert.name, concert.location, concert.url, concert.image, concert.venue, concert.date, concert.genre]);
+                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *", 
+                      [concert.concert_id, concert.name, concert.location, concert.image, concert.date, concert.url, concert.venue, concert.genre, concert.popularity_rank]);
                     console.log(concert);
                 }
 
@@ -602,12 +603,32 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
 
+    // for testing purposes
+    async _delete_all_concerts() {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("DELETE FROM concert RETURNING *");
+            console.log(res.rows);
+            return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
+
 
     // delete concerts with dates before the current
     async delete_old_concerts() {
         const client = await this.pool.connect();
         try {
-            const res = await client.query("DELETE FROM concert WHERE date < NOW() RETURNING *");
+            const res = await client.query("DELETE FROM concert WHERE CAST(concert_date AS DATE) < NOW() RETURNING *");
+            // const res = await client.query("SELECT concert_date FROM concert");
+            // const res = await client.query("DELETE FROM concert RETURNING *");
+            console.log(res.rows);
+
             return res;
         } 
         catch (e) {
@@ -699,6 +720,39 @@ export class DatabaseService implements OnModuleDestroy {
         try {
             const res = await client.query("SELECT COUNT(*) FROM user_concert WHERE userID = $1 AND concertID = $2", [userID, concertID]);
             return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
+
+    // TODO: still needs alot work here
+    async get_concerts(userID: string) {
+        const client = await this.pool.connect();
+        console.log(userID);
+        try {
+            // const favorite_artist = await client.query("SELECT favorite_artist FROM users WHERE user_id = $1", [userID]);
+            // const res = await client.query("SELECT * FROM concert_artist WHERE artist_name = $1 LIMIT 8", [favorite_artist]);
+            // let count = res.rows.length
+            let count = 0;
+
+            // if (count < 8) {
+                let remaining = 8 - count;
+                const res = await client.query("SELECT * FROM concert WHERE concert_id NOT IN (SELECT concert_id FROM concert_artist WHERE artist_name = $1) ORDER BY popularity_rank ASC LIMIT $2", ["favorite_artist", remaining]);
+                // res.rows.push(res2.rows[0]);
+                count++;
+            // }
+
+            // while (count < 8) {
+            //     const res2 = await client.query("SELECT * FROM concert");
+            //     res.rows.push(res2.rows[0]);
+            //     count++;
+            // }
+            
+            return {concerts: res.rows, success: true};
         } 
         catch (e) {
             console.log(e);
