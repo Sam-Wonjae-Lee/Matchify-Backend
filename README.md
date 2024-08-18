@@ -2,7 +2,7 @@
 
 <div align="center">
   <a href="https://github.com/Sam-Wonjae-Lee/Matchify-Frontend">
-    <img src="/public/matchify_logo.svg" alt="Matchify Logo" width="100" height="100">
+    <img src="/matchify_logo.svg" alt="Matchify Logo" width="100" height="100">
   </a>
 
   <h2 align="center">Matchify</h2>
