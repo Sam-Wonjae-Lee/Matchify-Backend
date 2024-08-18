@@ -230,7 +230,7 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
-        'DELETE FROM message WHERE messageID = $1 RETURNING *',
+        'DELETE FROM message WHERE message_id = $1 RETURNING *',
         [messageID],
       );
       console.log(res.rows);
@@ -672,7 +672,7 @@ export class DatabaseService implements OnModuleDestroy {
         const client = await this.pool.connect();
         try {
           // Currently this is not working because threadID is thread_id in the database
-            const res = await client.query("DELETE FROM thread WHERE threadID = $1 RETURNING *", [threadID]);
+            const res = await client.query("DELETE FROM thread WHERE thread_id = $1 RETURNING *", [threadID]);
             console.log(res.rows);
             return res;
         } 

@@ -56,7 +56,7 @@ describe('DatabaseService (Integration)', () => {
     const result2 = await pool.query('SELECT * FROM friends WHERE user1 = $1 AND user2 = $2', ['a', 'b']);
     expect(result2.rows.length).toBe(1);
   });
-  it('should flip the dark_mode value in settings', async () => {
+  it('should flip the dark_mode value in settings (testing settings use case)', async () => {
     const user_id = 'a'; // Set user_id to 'a'
 
     // Initial setup: Add a setting with default boolean values
@@ -75,6 +75,41 @@ describe('DatabaseService (Integration)', () => {
     expect(result.rows.length).toBe(1);
     expect(result.rows[0].dark_mode).toBe(false);
   });
-  
-  
+  it('should add a thread, add a message to the thread, and then remove both (testing thread and message use case)', async () => {
+    // Add a thread to the database
+    await service.add_thread(1, 'Test Thread');
+
+    // Query the added thread
+    let result = await pool.query('SELECT * FROM thread WHERE thread_id = $1', [1]);
+    expect(result.rows.length).toBe(1);
+
+    const messageID = 1; // Set messageID to 1
+    const userID = 'a'; // Set userID to 'a'
+    const threadID = 1; // Set threadID to 1
+    const content = 'Hello, world!'; // Set content to 'Hello, world!'
+
+    // Call the service method to add a message
+    await service.add_message(messageID, userID, threadID, content);
+
+    // Query the added message
+    const result1 = await pool.query('SELECT * FROM message WHERE message_id = $1', [messageID]);
+    expect(result1.rows.length).toBe(1);
+    expect(result1.rows[0].user_id).toBe(userID);
+    expect(result1.rows[0].thread_id).toBe(threadID);
+    expect(result1.rows[0].content).toBe(content);
+
+    // Call the service method to remove the added message
+    await service.remove_message(messageID);
+
+    // Query the removed message
+    const result2 = await pool.query('SELECT * FROM message WHERE message_id = $1', [messageID]);
+    expect(result2.rows.length).toBe(0);
+
+    // Remove the thread from the database
+    await service.remove_thread(threadID);
+
+    // Query the removed thread
+    const result3 = await pool.query('SELECT * FROM thread WHERE thread_id = $1', [threadID]);
+    expect(result3.rows.length).toBe(0);
+  });
 });
