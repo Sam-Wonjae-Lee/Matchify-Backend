@@ -15,6 +15,7 @@ import { ThreadModule } from './use_case/thread/thread.module';
 import { ConcertSearchingModule } from './use_case/concert_searching/concert_searching.module';
 import { AttendConcertModule } from './use_case/attend_concert/attend_concert.module';
 import { UserModule } from './use_case/user/user.module';
+import { ConcertRecommendationsModule } from './use_case/concert_recommendations/concert_recommendations.module';
 
 
 @Module({
@@ -30,7 +31,8 @@ import { UserModule } from './use_case/user/user.module';
     ThreadModule,
     ConcertSearchingModule,
     AttendConcertModule,
-    UserModule
+    UserModule,
+    ConcertRecommendationsModule
   ],
   controllers: [AppController],
   providers: [AppService],

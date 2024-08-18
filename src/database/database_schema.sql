@@ -107,7 +107,9 @@ CREATE TABLE concert (
     concert_date TEXT NOT NULL,
     link TEXT NOT NULL,
     venue TEXT NOT NULL,
-    genre TEXT NOT NULL
+    genre TEXT NOT NULL,
+    -- concert_month TEXT NOT NULL,
+    popularity_rank INT NOT NULL
 );
 
 CREATE TABLE user_concert (

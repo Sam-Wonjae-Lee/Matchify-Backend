@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { populate } from 'dotenv';
 import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
@@ -69,6 +70,7 @@ export class TicketMasterService {
                     ratio: string;
                     url: string;
                 }[];
+                rank?: number; // Add rank property
             }
         
             interface ApiResponse {
@@ -76,6 +78,11 @@ export class TicketMasterService {
                     events: Event[];
                 };
             }
+
+            // Assign ranks to events
+            data._embedded.events.forEach((event: Event, index: number) => {
+                event.rank = index + 1;
+            });
 
             // saving the eevents info into a variable
         
@@ -90,11 +97,13 @@ export class TicketMasterService {
                 promoter: event._embedded.promoters ? event._embedded.promoters[0]?.name : 'Unknown Promoter',
                 performers: event._embedded.attractions ? event._embedded.attractions.map(attraction => attraction.name).join(', ') : 'Unknown Performers',
                 genre: event.classifications ? event.classifications[0]?.genre.name : 'Unknown Genre',
-                subGenre: event.classifications ? event.classifications[0]?.subGenre?.name : 'Unknown SubGenre'
+                subGenre: event.classifications ? event.classifications[0]?.subGenre?.name : 'Unknown SubGenre',
+                popularity_rank: event.rank
             }));
 
             // Add upcoming concerts to the database
-            this.databaseService.delete_old_concerts();
+            // this.databaseService.delete_old_concerts();
+            this.databaseService._delete_all_concerts();
             this.databaseService.update_concerts(events);
 
             return events.map((event) => ({
