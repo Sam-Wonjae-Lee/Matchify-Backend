@@ -1,4 +1,4 @@
-import { Injectable, HttpException, Redirect } from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { off } from 'process';
 import { DatabaseService } from 'src/database/database.service';
 
@@ -9,7 +9,7 @@ export interface ProfileObject {
 }
 
 @Injectable()
-export class SpotifyService {
+export class SpotifyService implements OnApplicationBootstrap{
 
   private clientID: string;
   private clientSecret: string;
@@ -21,8 +21,39 @@ export class SpotifyService {
     this.redirectURI = process.env.SPOTIFY_REDIRECT_URI;
   }
 
+  /** 
+   * Runs on backend startup and refreshes all users tokens
+   * Necessary so that users can visit other user profiles
+   * */ 
+  onApplicationBootstrap() {
 
-  
+    const refreshAllTokens = async () => {
+      const rows = await this.databaseService.getAllRefreshTokens();
+      for (let i = 0; i < rows.length; i++) {
+        const response = await fetch('https://accounts.spotify.com/api/token', {
+          method: 'POST', 
+          body: new URLSearchParams({
+            'grant_type': 'refresh_token',
+            'refresh_token': rows[i].refresh_token,
+          }),
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Basic ' + (Buffer.from(this.clientID + ':' + this.clientSecret).toString('base64')),
+          },
+        });
+
+        if (!response.ok) {
+            console.log("REFRESHING TOKEN FAILED");
+            return;
+        }
+        const data = await response.json();
+        await this.databaseService.addAccessRefreshToken(rows[i].user_id, data.access_token, data.refresh_token ? data.refresh_token : rows[i].refresh_token);
+      }
+      console.log("FINISHED REFRESHING ALL TOKENS ON STARTUP");
+    }
+    refreshAllTokens();
+  }
+
   /**
    * Get the current user's profile. In other words, get detailed profile information about the current user.
    * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile
