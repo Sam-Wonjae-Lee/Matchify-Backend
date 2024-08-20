@@ -27,6 +27,20 @@ export class DatabaseService implements OnModuleDestroy {
     await this.pool.end();
   }
 
+  async getAllRefreshTokens() {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT user_id, refresh_token FROM tokens'
+      );
+      return res.rows;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
   async addAccessRefreshToken(user: string, access_token: string, refresh_token: string) {
     const client = await this.pool.connect();
     try {
