@@ -27,7 +27,9 @@ describe('DatabaseService (Integration)', () => {
       database: process.env.DB_DATABASE,
     });
 
-    await pool.query(resetTablesQuery);
+    if (process.env.DB_PORT === '26774') {
+      await pool.query(resetTablesQuery);
+    }
   });
 
   afterAll(async () => {

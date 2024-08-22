@@ -312,7 +312,7 @@ export class DatabaseService implements OnModuleDestroy {
     }
     try {
       const deleteRequest = await client.query(
-        'DELETE FROM friendrequest WHERE receiver = $1 AND sender = $2 RETURNING *',
+        'DELETE FROM friend_request WHERE receiver = $1 AND sender = $2 RETURNING *',
         [user_id2, user_id1]
       );
       console.log(deleteRequest.rows);
@@ -535,7 +535,7 @@ export class DatabaseService implements OnModuleDestroy {
           user_id2 = sender_id;
         } 
         try {
-            const res = await client.query("DELETE FROM friendrequest WHERE sender = $1 AND receiver = $2 RETURNING *", [user_id1, user_id2]);
+            const res = await client.query("DELETE FROM friend_request WHERE sender = $1 AND receiver = $2 RETURNING *", [user_id1, user_id2]);
             console.log(res.rows);
         return res;
         } 
@@ -601,6 +601,22 @@ export class DatabaseService implements OnModuleDestroy {
         finally {
             client.release();
         }
+    }
+
+    // gets friend requests for a user
+    async get_friend_requests(userID: string) {
+      const client = await this.pool.connect();
+      try {
+      const result = await client.query(
+        'SELECT * FROM friend_request WHERE receiver = $1',
+        [userID]
+      );
+      return result.rows;
+      } catch (e) {
+      console.log(e);
+      } finally {
+      client.release();
+      }
     }
 
     // for testing purposes

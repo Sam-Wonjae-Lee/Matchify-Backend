@@ -18,4 +18,9 @@ export class FriendRequestService {
         this.databaseService.unsend_friend_request(senderID, receiverID);
     }
 
+    // gets friend requests for a user
+    get_friend_requests(userID: string) {
+        return this.databaseService.get_friend_requests(userID);
+    }
+
 }

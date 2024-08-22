@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get } from '@nestjs/common';
 import { FriendRequestService } from './friend_request.service';
 import { SendFriendRequestDto } from './dto/send_friend_request.dto';
 import { UnsendFriendRequestDto } from './dto/unsend_friend_request.dto';
@@ -16,6 +16,11 @@ export class FriendRequestController {
     @Post('/unsend_friend_request')
     unsend_friend_request(@Body() unsendFriendRequestDto: UnsendFriendRequestDto) {
         return this.friendRequestService.unsend_friend_request(unsendFriendRequestDto);
+    }
+
+    @Get('/get_user_friend_requests/:id')
+    async getUserFriendRequests(@Param('id') id: string) {
+        return this.friendRequestService.get_friend_requests(id);
     }
 }
 
