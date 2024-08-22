@@ -8,8 +8,13 @@ export class MatchController {
 
     // // TODO: Create add users to friend function from match service
     // @Post
-    add_users_to_friend(@Body() matchDto: MatchDto) {
-        return;
+    // add_users_to_friend(@Body() matchDto: MatchDto) {
+    //     return;
+    // }
+
+    @Post('/get_matches')
+    matchPotentialFriends(@Body('user_id') user_id: string) {
+        return this.matchService.matchPotentialFriends(user_id);
     }
 
 }

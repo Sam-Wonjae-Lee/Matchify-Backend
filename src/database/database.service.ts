@@ -94,13 +94,36 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
+  async getUnfriendedUsers(limit: number, user_id: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT * FROM users \
+        WHERE user_id <> $1 \
+        AND NOT EXISTS (SELECT * FROM friends WHERE (user1 = user_id AND user2 = $1) OR (user1 = $1 AND user2 = user_id)) \
+        ORDER BY RANDOM() LIMIT $2',
+        [user_id, limit],
+      );
+      return res.rows;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
   async getUserFriends(user: string) {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
-        'SELECT * FROM friends WHERE user1 = $1 OR user2 = $2',
-        [user, user],
+        'SELECT *  \
+        FROM friends \
+        JOIN users AS a ON user1 = a.user_id\
+        JOIN users AS b ON user2 = b.user_id\
+        WHERE user1 = $1 OR user2 = $1',
+        [user],
       );
+      console.log(res.rows);
       return res.rows;
     } catch (e) {
       console.log(e);

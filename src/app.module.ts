@@ -16,6 +16,7 @@ import { ConcertSearchingModule } from './use_case/concert_searching/concert_sea
 import { AttendConcertModule } from './use_case/attend_concert/attend_concert.module';
 import { UserModule } from './use_case/user/user.module';
 import { ConcertRecommendationsModule } from './use_case/concert_recommendations/concert_recommendations.module';
+import { MatchModule } from './use_case/match/match.module';
 
 
 @Module({
@@ -32,7 +33,8 @@ import { ConcertRecommendationsModule } from './use_case/concert_recommendations
     ConcertSearchingModule,
     AttendConcertModule,
     UserModule,
-    ConcertRecommendationsModule
+    ConcertRecommendationsModule,
+    MatchModule
   ],
   controllers: [AppController],
   providers: [AppService],
