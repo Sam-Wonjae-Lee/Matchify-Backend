@@ -82,7 +82,6 @@ CREATE TABLE friend_request (
     PRIMARY KEY (sender, receiver),
     FOREIGN KEY (sender) REFERENCES users(user_id),
     FOREIGN KEY (receiver) REFERENCES users(user_id),
-    CHECK (sender < receiver)
 );
 
 --please check options for settings--
