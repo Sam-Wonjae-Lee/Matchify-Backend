@@ -20,6 +20,17 @@ export class UserController {
     @Get('/get_user_friends/:id')
     async getUserFriends(@Param('id') id: string) {
         return this.userService.getUserFriends(id);
+    }
+
+    @Post('/is_friends_with/:id')
+    async getIsUserFriendsWith(@Param('id') id: string, @Body('userToCheck') userToCheck: string) {
+        return this.userService.getIsUserFriendsWith(id, userToCheck);
+    }
+
+    @Post('/unfriend/:id')
+    async unfriend(@Param('id') id: string, @Body('unfriended') unfriended: string) {
+        return this.userService.unfriend(id, unfriended);
 
     }
+
 }
