@@ -18,4 +18,16 @@ export class UserService {
     async getUserFriends(user: string){
         return await this.databaseService.getUserFriends(user);
     }
+
+    async getIsUserFriendsWith(user: string, userToCheck: string) {
+        const response = await this.databaseService.getIsUserFriendsWith(user, userToCheck);
+        if (response) {
+            return {status: true}
+        }
+        return {status: false}
+    }
+
+    async unfriend(user: string, unfriended: string) {
+        return await this.databaseService.unfriend(user, unfriended);
+    }
 }

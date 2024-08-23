@@ -18,6 +18,6 @@ export class MatchService {
     }
 
     private incrediblyComplexMatchingAlgorithm(user_id) {
-        return this.databaseService.getUnfriendedUsers(5, user_id);
+        return this.databaseService.getUnfriendedAndNotPendingUsers(5, user_id);
     }
 }

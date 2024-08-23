@@ -17,5 +17,10 @@ export class FriendRequestController {
     unsend_friend_request(@Body() unsendFriendRequestDto: UnsendFriendRequestDto) {
         return this.friendRequestService.unsend_friend_request(unsendFriendRequestDto);
     }
+
+    @Post('/get_user_friend_requests')
+    get_user_friend_requests(@Body('receiverID') receiverID) {
+        return this.friendRequestService.get_user_friend_requests(receiverID);
+    }
 }
 
