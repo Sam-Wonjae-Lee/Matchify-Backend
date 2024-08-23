@@ -282,17 +282,11 @@ export class DatabaseService implements OnModuleDestroy {
   // sends friend request
   async send_friend_request(sender_id: string, receiver_id: string) {
     const client = await this.pool.connect();
-    // did this to comply with the database constraint for friends
-    let user_id1 = sender_id;
-    let user_id2 = receiver_id;
-    if (receiver_id < sender_id){
-      user_id1 = receiver_id;
-      user_id2 = sender_id;
-    }
+    // removed the constraint from the database
     try {
       const res = await client.query(
         'INSERT INTO friend_request VALUES ($1, $2) RETURNING *',
-        [user_id1, user_id2],
+        [sender_id, receiver_id],
       );
       return res;
     } catch (e) {
@@ -306,14 +300,14 @@ export class DatabaseService implements OnModuleDestroy {
   async acceptFriendRequest(receiver_id: string, sender_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
-    // did this to comply with the database constraint for friends
-    let user_id1 = sender_id;
-    let user_id2 = receiver_id;
-    if (receiver_id < sender_id){
-      user_id1 = receiver_id;
-      user_id2 = sender_id;
-    }
+
     try {
+      let user_id1 = sender_id;
+      let user_id2 = receiver_id;
+      if (receiver_id < sender_id){
+        user_id1 = receiver_id;
+        user_id2 = sender_id;
+      }
       const insertFriend = await client.query(
         'INSERT INTO friends (user1, user2) VALUES ($1, $2) RETURNING *',
         [user_id1, user_id2]
@@ -321,7 +315,7 @@ export class DatabaseService implements OnModuleDestroy {
       console.log(insertFriend.rows);
       const deleteRequest = await client.query(
         'DELETE FROM friend_request WHERE receiver = $1 AND sender = $2 RETURNING *',
-        [user_id2, user_id1]
+        [receiver_id, sender_id]
       );
       console.log(deleteRequest.rows);
       return {
@@ -339,18 +333,10 @@ export class DatabaseService implements OnModuleDestroy {
   async declineFriendRequest(receiver_id: string, sender_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
-
-    // did this to comply with the database constraint for friends
-    let user_id1 = sender_id;
-    let user_id2 = receiver_id;
-    if (receiver_id < sender_id){
-      user_id1 = receiver_id;
-      user_id2 = sender_id;
-    }
     try {
       const deleteRequest = await client.query(
         'DELETE FROM friendrequest WHERE receiver = $1 AND sender = $2 RETURNING *',
-        [user_id2, user_id1]
+        [receiver_id, sender_id]
       );
       console.log(deleteRequest.rows);
       return deleteRequest;
