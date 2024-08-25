@@ -114,4 +114,23 @@ describe('DatabaseService (Integration)', () => {
     const result3 = await pool.query('SELECT * FROM thread WHERE thread_id = $1', [threadID]);
     expect(result3.rows.length).toBe(0);
   });
+  it('should add a block and unblock (testing block and unblock use case)', async () => {
+    const blocker = 'a'; // Set blocker to 'a'
+    const blocked = 'b'; // Set blocked to 'b'
+
+    // Call the service method to add a block
+    await service.blockUser(blocker, blocked);
+
+    // Query the blocked user
+    const result1 = await pool.query('SELECT * FROM blocks WHERE blocker = $1 AND blocked = $2', [blocker, blocked]);
+    expect(result1.rows.length).toBe(1);
+
+    // Call the service method to remove the block
+    await service.unblockUser(blocker, blocked);
+
+    // Query the unblocked user
+    const result2 = await pool.query('SELECT * FROM blocks WHERE blocker = $1 AND blocked = $2', [blocker, blocked]);
+    expect(result2.rows.length).toBe(0);
+  });
+
 });
