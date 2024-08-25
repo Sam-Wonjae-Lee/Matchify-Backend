@@ -18,9 +18,9 @@ export class FriendRequestController {
         return this.friendRequestService.unsend_friend_request(unsendFriendRequestDto);
     }
 
-    @Get('/get_user_friend_requests/:id')
-    async getUserFriendRequests(@Param('id') id: string) {
-        return this.friendRequestService.get_friend_requests(id);
+    @Post('/get_user_friend_requests')
+    get_user_friend_requests(@Body('receiverID') receiverID) {
+        return this.friendRequestService.get_user_friend_requests(receiverID);
     }
 }
 

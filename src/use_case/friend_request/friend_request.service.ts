@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import { DatabaseService } from '../../database/database.service';
 import { SendFriendRequestDto } from './dto/send_friend_request.dto';
 
@@ -18,9 +18,8 @@ export class FriendRequestService {
         this.databaseService.unsend_friend_request(senderID, receiverID);
     }
 
-    // gets friend requests for a user
-    get_friend_requests(userID: string) {
-        return this.databaseService.get_friend_requests(userID);
+    get_user_friend_requests(receiverID: string) {
+        return this.databaseService.getUserFriendRequests(receiverID);
     }
 
 }

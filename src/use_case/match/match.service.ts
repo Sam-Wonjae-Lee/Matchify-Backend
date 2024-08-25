@@ -12,12 +12,13 @@ export class MatchService {
     //     // this.databaseService
     // }
 
-    matchPotentialFriends(user_id: string) {
-        return this.incrediblyComplexMatchingAlgorithm(user_id);
+    async matchPotentialFriends(user_id: string) {
+        return await this.incrediblyComplexMatchingAlgorithm(user_id);
 
     }
 
-    private incrediblyComplexMatchingAlgorithm(user_id) {
-        return this.databaseService.getUnfriendedUsers(5, user_id);
+    private async incrediblyComplexMatchingAlgorithm(user_id) {
+        const response = await this.databaseService.getUnfriendedAndNotPendingUsers(5, user_id);
+        return response;
     }
 }
