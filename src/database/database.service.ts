@@ -117,15 +117,24 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
-        'SELECT *  \
+        'SELECT * \
         FROM friends \
-        JOIN users AS a ON user1 = a.user_id\
-        JOIN users AS b ON user2 = b.user_id\
-        WHERE user1 = $1 OR user2 = $1',
+        JOIN users ON user2 = user_id\
+        WHERE user1 = $1',
         [user],
       );
-      console.log(res.rows);
-      return res.rows;
+
+      const res2 = await client.query(
+        'SELECT * \
+        FROM friends \
+        JOIN users ON user1 = user_id\
+        WHERE user2 = $1',
+        [user],
+      )
+
+      const final_res = [...res.rows, ...res2.rows];
+      console.log(final_res);
+      return final_res;
     } catch (e) {
       console.log(e);
     } finally {
