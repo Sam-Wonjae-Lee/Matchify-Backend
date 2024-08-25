@@ -13,8 +13,8 @@ export class MatchController {
     // }
 
     @Post('/get_matches')
-    matchPotentialFriends(@Body('user_id') user_id: string) {
-        return this.matchService.matchPotentialFriends(user_id);
+    async matchPotentialFriends(@Body('user_id') user_id: string) {
+        return await this.matchService.matchPotentialFriends(user_id);
     }
 
 }
