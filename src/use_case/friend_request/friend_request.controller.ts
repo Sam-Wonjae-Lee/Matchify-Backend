@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get } from '@nestjs/common';
 import { FriendRequestService } from './friend_request.service';
 import { SendFriendRequestDto } from './dto/send_friend_request.dto';
 import { UnsendFriendRequestDto } from './dto/unsend_friend_request.dto';
