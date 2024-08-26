@@ -125,7 +125,7 @@ export class SpotifyService implements OnApplicationBootstrap{
    * @returns URL for Spotify Authorization
    */
   public getAuthUrl(): string {
-    const scope = 'user-read-private user-read-email user-top-read'; // Permissions for authorization
+    const scope = 'user-read-private user-read-email user-top-read user-read-playback-state'; // Permissions for authorization
     const authURL = `https://accounts.spotify.com/authorize?client_id=${this.clientID}&redirect_uri=${encodeURIComponent(this.redirectURI)}&scope=${encodeURIComponent(scope)}&response_type=code`;
     return authURL;
   }
@@ -315,5 +315,19 @@ export class SpotifyService implements OnApplicationBootstrap{
     });
 
     return genreCounts;
+  }
+
+  public getCurrentPlaybackState = async (userId: string) => {
+    const accessToken = await this.databaseService.getUserAccessToken(userId);
+
+    const response = await fetch('https://api.spotify.com/v1/me/player', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    const data = await response.json();
+    console.log(data);
+    return data.item.name;
   }
 }

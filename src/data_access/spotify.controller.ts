@@ -57,4 +57,9 @@ export class SpotifyController {
   async getUserTopGenres(@Param('id') id: string) {
     return this.spotifyService.getUserTopGenres(id);
   }
+
+  @Get('user/:id/playback')
+  async getCurrentPlaybackState(@Param('id') id: string) {
+    return this.spotifyService.getCurrentPlaybackState(id);
+  }
 }
