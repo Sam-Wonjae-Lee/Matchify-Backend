@@ -326,8 +326,20 @@ export class SpotifyService implements OnApplicationBootstrap{
       },
     });
 
-    const data = await response.json();
-    console.log(data);
-    return data.item.name;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('Response error message:', errorText);
+      return null;
+    }
+
+    const responseBody = await response.text();
+
+    // handles case if user is not playing music
+    if (responseBody) {
+      const data = JSON.parse(responseBody);
+      console.log(data);
+      return data.item.name;
+    }
+    return null;
   }
 }
