@@ -46,7 +46,7 @@ describe('DatabaseService (Integration)', () => {
   });
   it('users send friends requests', async () => {
     await service.send_friend_request('b','a');
-    const result1 = await pool.query('SELECT * FROM friend_request WHERE sender = $1 AND receiver = $2', ['a', 'b']);
+    const result1 = await pool.query('SELECT * FROM friend_request WHERE sender = $1 AND receiver = $2', ['b', 'a']);
     expect(result1.rows.length).toBe(1);
   });
   it('users accept friends requests', async () => {
