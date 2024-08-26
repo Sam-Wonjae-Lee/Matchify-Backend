@@ -1,15 +1,15 @@
-import { Controller, Get, Body } from '@nestjs/common';
+import { Controller, Get, Body, Post} from '@nestjs/common';
 import { ConcertSearchingDto } from './dto/concert_searching.dto';
 import { ConcertSearchingService } from './concert_searching.service';
 
 
-@Controller('concert_searching')
+@Controller('search_concerts')
 export class ConcertSearchingController {
     constructor(private readonly concertSearchingService: ConcertSearchingService) {}
 
-    @Get('/get_concerts')
-    get_concerts(@Body() concertSearchingDto: ConcertSearchingDto) {
-        return this.concertSearchingService.get_concerts(concertSearchingDto)
+    @Post()
+    search_concerts(@Body() concertSearchingDto: ConcertSearchingDto) {
+        return this.concertSearchingService.search_concerts(concertSearchingDto)
     }
 }
 
