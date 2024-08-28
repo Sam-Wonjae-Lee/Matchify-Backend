@@ -745,10 +745,12 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
    
-    async search_concert() {
+    async search_concert(concert_name: string) {
       const client = await this.pool.connect();
       try{
-
+        const res = await client.query("SELECT * FROM concert WHERE concert_name ILIKE $1 LIMIT 8", [`%${concert_name}%`]);
+        console.log(res.rows);
+        return res.rows;
       }
       catch (e){
         console.log(e);
@@ -824,8 +826,9 @@ export class DatabaseService implements OnModuleDestroy {
     async is_user_attending_concert(userID: string, concertID: string) {
         const client = await this.pool.connect();
         try {
-            const res = await client.query("SELECT COUNT(*) FROM user_concert WHERE userID = $1 AND concertID = $2", [userID, concertID]);
-            return res;
+            const res = await client.query("SELECT COUNT(*) FROM user_concert WHERE user_id = $1 AND concert_id = $2", [userID, concertID]);
+            console.log(res.rows);
+            return res.rows[0].count;
         } 
         catch (e) {
             console.log(e);

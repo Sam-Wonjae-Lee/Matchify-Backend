@@ -10,7 +10,7 @@ export class ConcertSearchingService {
 
 
     // get concerts
-    get_concerts(concertSearchingDto: ConcertSearchingDto) {
+    search_concerts(concertSearchingDto: ConcertSearchingDto) {
         const {
             performers,
             concert_name,
@@ -21,8 +21,8 @@ export class ConcertSearchingService {
         } = concertSearchingDto;
 
         // get concerts from the database
-        // const list_of_concerts = this.databaseService.get_concerts(performers, concert_name, genres, date_range_start, date_range_end, cities);
+        const list_of_concerts = this.databaseService.search_concert(concert_name);
         
-        // return list_of_concerts;
+        return list_of_concerts;
     }
 }
