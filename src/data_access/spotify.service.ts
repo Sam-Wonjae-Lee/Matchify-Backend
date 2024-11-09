@@ -182,6 +182,22 @@ export class SpotifyService implements OnApplicationBootstrap{
   }
 
   /**
+   * Get a playlist. 
+   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-playlist
+   */
+  public async getPlaylist(playlistId: string, userId: string) {
+    const accessToken = await this.databaseService.getUserAccessToken(userId);
+
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+    const data = await response.json();
+    return data;
+  }
+
+  /**
    * Get the tracks/items from a playlist. 
    * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
    * @param playlistId A string containing the Spotify playlist ID.
@@ -191,7 +207,7 @@ export class SpotifyService implements OnApplicationBootstrap{
 
     const accessToken = await this.databaseService.getUserAccessToken(userId);
 
-    console.log(accessToken);
+    // console.log(accessToken);
 
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`, {
       headers: {
@@ -342,4 +358,6 @@ export class SpotifyService implements OnApplicationBootstrap{
     }
     return null;
   }
+
+
 }
