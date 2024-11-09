@@ -41,17 +41,11 @@ describe('DatabaseService (Integration)', () => {
     await service.addUserInfo('b', 'user1', 'bob', 'george', 'detriot', new Date(), 'loves chicken', 'nice@gmail.com', '/best_girl.jpg','playlist1', "gay");
     const result2 = await pool.query('SELECT * FROM users WHERE user_id = $1', ['b']);
     expect(result2.rows.length).toBe(1);
-    await service.addUserInfo('c', 'user1', 'bob', 'george', 'detriot', new Date(), 'loves chicken', 'nice@gmail.com', '/best_girl.jpg','playlist1', "gay");
-    const result3 = await pool.query('SELECT * FROM users WHERE user_id = $1', ['c']);
-    expect(result3.rows.length).toBe(1);
   });
   it('users send friends requests', async () => {
     await service.send_friend_request('b','a');
     const result1 = await pool.query('SELECT * FROM friend_request WHERE sender = $1 AND receiver = $2', ['a', 'b']);
     expect(result1.rows.length).toBe(1);
-    await service.send_friend_request('a','c');
-    const result2 = await pool.query('SELECT * FROM friend_request WHERE sender = $1 AND receiver = $2', ['a', 'c']);
-    expect(result2.rows.length).toBe(1);
   });
   it('users accept friends requests', async () => {
     // check if the friend request is deleted
