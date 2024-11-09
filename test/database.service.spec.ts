@@ -24,7 +24,7 @@ client.connect()
     const filePath = path.join('src/database', 'database_schema.sql');
     const createTablesQuery = fs.readFileSync(filePath, 'utf8');
 
-    return client.query(createTablesQuery);
+    return client.query("SELECT * FROM friends");
 })
 .then(() => {
     console.log('Tables created successfully');

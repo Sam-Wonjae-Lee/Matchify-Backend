@@ -80,6 +80,7 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
+  // tested works
   async getUserFriends(user: string) {
     const client = await this.pool.connect();
     try {
@@ -95,6 +96,7 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
+  // tested by frunk
   async addUserInfo(user_id: string, username: string, first_name: string, last_name: string, location: string, dob: Date, bio: string, email: string, profile_pic: string, favourite_playlist: string, gender: string) {
     const client = await this.pool.connect();
     try {
@@ -116,6 +118,7 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
+
   async updateUserInfo({
     user_id,
     username = null,
@@ -132,34 +135,35 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       if (username !== null) {
-        client.query('UPDATE users SET username = $1 WHERE user_id = $2', [username, user_id]);
+        console.log(username);
+        await client.query('UPDATE users SET username = $1 WHERE user_id = $2', [username, user_id]);
       }
       if (first_name !== null) {
-        client.query('UPDATE users SET first_name = $1 WHERE user_id = $2', [first_name, user_id]);
+        await client.query('UPDATE users SET first_name = $1 WHERE user_id = $2', [first_name, user_id]);
       }
       if (last_name !== null) {
-        client.query('UPDATE users SET last_name = $1 WHERE user_id = $2', [last_name, user_id]);
+        await client.query('UPDATE users SET last_name = $1 WHERE user_id = $2', [last_name, user_id]);
       }
       if (location !== null) {
-        client.query('UPDATE users SET location = $1 WHERE user_id = $2', [location, user_id]);
+        await client.query('UPDATE users SET location = $1 WHERE user_id = $2', [location, user_id]);
       }
       if (dob !== null) {
-        client.query('UPDATE users SET dob = $1 WHERE user_id = $2', [dob, user_id]);
+        await client.query('UPDATE users SET dob = $1 WHERE user_id = $2', [dob, user_id]);
       }
       if (bio !== null) {
-        client.query('UPDATE users SET bio = $1 WHERE user_id = $2', [bio, user_id]);
+        await client.query('UPDATE users SET bio = $1 WHERE user_id = $2', [bio, user_id]);
       }
       if (email !== null) {
-        client.query('UPDATE users SET email = $1 WHERE user_id = $2', [email, user_id]);
+        await client.query('UPDATE users SET email = $1 WHERE user_id = $2', [email, user_id]);
       }
       if (profile_pic !== null) {
-        client.query('UPDATE users SET profile_pic = $1 WHERE user_id = $2', [profile_pic, user_id]);
+        await client.query('UPDATE users SET profile_pic = $1 WHERE user_id = $2', [profile_pic, user_id]);
       }
       if (favourite_playlist !== null) {
-        client.query('UPDATE users SET favourite_playlist = $1 WHERE user_id = $2', [favourite_playlist, user_id]);
+        await client.query('UPDATE users SET favourite_playlist = $1 WHERE user_id = $2', [favourite_playlist, user_id]);
       }
       if (gender !== null) {
-        client.query('UPDATE users SET gender = $1 WHERE user_id = $2', [gender, user_id]);
+        await client.query('UPDATE users SET gender = $1 WHERE user_id = $2', [gender, user_id]);
       }
 
     } catch (e) {
