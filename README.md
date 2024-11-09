@@ -16,7 +16,9 @@ Matchify uses music data from Spotify to connect users, recommend events, and fa
     ·
     <a href="">View Demo</a>
     ·
-    <a href="">Request Feature</a>
+    <a href="https://github.com/Sam-Wonjae-Lee/Matchify-Frontend/issues/new?assignees=&labels=&projects=&template=feature-request-%F0%9F%9A%80.md&title=">Request Feature</a>
+    ·
+    <a href="https://github.com/Sam-Wonjae-Lee/Matchify-Frontend/issues/new?assignees=&labels=&projects=&template=bug-report-%F0%9F%90%9E.md&title=">Bug Report</a>
   </p>
 </div>
 
@@ -59,18 +61,52 @@ Stay connected with friends through group and individual chats. Share music, pla
 ![Nest.js](https://img.shields.io/badge/nestjs-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
 
+
+<!-- Installation -->
+## Installation
+This is how to set up the project locally. To get a local copy running, follow the steps below.
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) - For any Node.js project
+- [npm](https://www.npmjs.com/) - For installing dependencies
+- [PostgreSQL](https://www.postgresql.org/) - For database
+
+### Instructions
+1. **Clone the Repository**  
+   Open your terminal and run the following command:
+   ```bash
+   git clone https://github.com/Sam-Wonjae-Lee/Matchify-Frontend.git
+   ```
+
+2. **Navigate into project directory**\
+  Make sure to be in the project folder that has been cloned. 
+
+3. **Install dependencies with npm**
+    ```bash
+    npm install
+    ```
+
+4. **Create database using the database_schema.sql file**\
+This should contain the SQL commands to create the necessary tables to create the database locally
+
+
+5. **Run the project**\
+    The project frontend needs to run as well. More information can be found [here](https://github.com/Sam-Wonjae-Lee/Matchify-Frontend).
+    ```bash
+    npm run start
+    ```
+
+
 <!-- CREDITS -->
 ## Credits
 
 ### Contributors
-**Andy Ren** ([1172097](https://github.com/1172097)) - Frontend/Backend Developer \
+**Andy Ren** ([1172097](https://github.com/1172097)) - Developer \
 **Calvin Liew** ([Calvin-Liew](https://github.com/Calvin-Liew)) - UI/UX Designer \
-**Dmitrii Vlasov** ([Endlesssuply](https://github.com/Endlesssuply)) - Backend Developer \
-**Frank Peng** ([Graves451](https://github.com/Graves451)) - Frontend/Backend/Database Developer \
-**Michael Pan** ([Yaymichael](https://github.com/Yaymichael)) - Backend Developer \
-**Richard Chen** ([Riixardo](https://github.com/Riixardo)) - Frontend/Backend/Database Developer\
-**Wonjae (Samuel) Lee** ([Sam-Wonjae-Lee](https://github.com/Sam-Wonjae-Lee)) - Frontend/Backend Developer \
-**Yehyun Lee** ([YehyunLee](https://github.com/YehyunLee)) - Frontend/Backend Developer
+**Dmitrii Vlasov** ([Endlesssuply](https://github.com/Endlesssuply)) - Developer \
+**Frank Peng** ([Graves451](https://github.com/Graves451)) - Developer \
+**Richard Chen** ([Riixardo](https://github.com/Riixardo)) - Developer\
+**Wonjae (Samuel) Lee** ([Sam-Wonjae-Lee](https://github.com/Sam-Wonjae-Lee)) - Developer 
 
 <!-- CONTACT -->
 ## Contact
