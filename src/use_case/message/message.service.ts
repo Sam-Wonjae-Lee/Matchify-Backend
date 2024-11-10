@@ -16,8 +16,8 @@ export class MessageService {
 
     // removes messageid from the database
     removemessage(removeMessageDto: RemoveMessageDto){
-        const {messageID} = removeMessageDto;
-        this.databaseService.remove_message(messageID);
+        const {message_id} = removeMessageDto;
+        this.databaseService.remove_message(message_id);
     }
 
 }

@@ -14,6 +14,15 @@ export class SpotifyController {
   //   return this.spotifyService.getUserInfo(id);
   // }
 
+  @Get('audio-features')
+  async getAudioFeatures(@Query('ids') trackIds: string[], @Query('user_id') userId: string) {
+    console.log(typeof(trackIds));
+
+    // Call the Spotify service to get the audio features for the track IDs
+    return this.spotifyService.getAudioFeatures(trackIds, userId);
+  }
+
+
   @Post('playlists/:id/tracks')
   async getPlaylistItems(@Param('id') id: string, @Body('user_id') user_id: string, @Body('limit') limit: number, @Body('offset') offset: number) {
     return this.spotifyService.getPlaylistItems(id, user_id, limit, offset);
@@ -56,5 +65,10 @@ export class SpotifyController {
   @Get('user/:id/top-genres')
   async getUserTopGenres(@Param('id') id: string) {
     return this.spotifyService.getUserTopGenres(id);
+  }
+
+  @Get('user/:id/playback')
+  async getCurrentPlaybackState(@Param('id') id: string) {
+    return this.spotifyService.getCurrentPlaybackState(id);
   }
 }

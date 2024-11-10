@@ -8,18 +8,39 @@ export class UserController {
 
     @Get('/get/:id')
     async getUser(@Param('id') id: string) {
-        return this.userService.getUser(id);
+        return await this.userService.getUser(id);
     }
 
     @Post('/post/:id')
     async updateUser(@Param('id') id: string, @Body() postUserDto: PostUserDto) {
         const {bio, location, gender, fav_playlist, dob} = postUserDto;
-        return this.userService.updateUser(id, bio, location, gender, fav_playlist, dob);
+        return await this.userService.updateUser(id, bio, location, gender, fav_playlist, dob);
+    }
+
+    @Post('/vector/:id')
+    async updateUserVector(@Param('id') id: string, @Body() vector: any) {
+        return await this.userService.updateUserVector(vector.body.vector, id);
     }
   
     @Get('/get_user_friends/:id')
     async getUserFriends(@Param('id') id: string) {
-        return this.userService.getUserFriends(id);
+        return await this.userService.getUserFriends(id);
+    }
+
+    @Post('/is_friends_with/:id')
+    async getIsUserFriendsWith(@Param('id') id: string, @Body('userToCheck') userToCheck: string) {
+        return await this.userService.getIsUserFriendsWith(id, userToCheck);
+    }
+
+    @Get('/get_user_match/:id')
+    async getUserMatch(@Param('id') id: string) {
+        return this.userService.getUserMatch(id);
+    }
+
+    @Post('/unfriend/:id')
+    async unfriend(@Param('id') id: string, @Body('unfriended') unfriended: string) {
+        return await this.userService.unfriend(id, unfriended);
 
     }
+
 }

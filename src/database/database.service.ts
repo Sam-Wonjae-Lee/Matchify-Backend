@@ -27,6 +27,7 @@ export class DatabaseService implements OnModuleDestroy {
     await this.pool.end();
   }
 
+
   //  async createDirectThreadTable(): Promise<void> {
   //       const client = await this.pool.connect();
   //       try {
@@ -49,6 +50,21 @@ export class DatabaseService implements OnModuleDestroy {
   //           client.release();
   //       }
   //   }
+
+  async getAllRefreshTokens() {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT user_id, refresh_token FROM tokens'
+      );
+      return res.rows;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
 
   async addAccessRefreshToken(user: string, access_token: string, refresh_token: string) {
     const client = await this.pool.connect();
@@ -103,18 +119,87 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  async getUserFriends(user: string) {
+  async getUnfriendedAndNotPendingUsers(limit: number, user_id: string) {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
-        'SELECT CASE WHEN user1 = $1 THEN user2 ELSE user1 END AS friend FROM friends WHERE user1 = $1 OR user2 = $1',
-        [user],
+        'SELECT * FROM users \
+        WHERE user_id <> $1 \
+        AND NOT EXISTS (SELECT * FROM friends WHERE (user1 = user_id AND user2 = $1) OR (user1 = $1 AND user2 = user_id)) \
+        AND NOT EXISTS (SELECT * FROM friend_request WHERE (sender = user_id AND receiver = $1) OR (sender = $1 AND receiver = user_id)) \
+        ORDER BY RANDOM() LIMIT $2',
+        [user_id, limit],
       );
       return res.rows.map(row => row.friend);
     } catch (e) {
       console.log(e);
     } finally {
       client.release();
+    }
+  }
+
+  async getUserVectors(){
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query('SELECT * FROM user_vectors');
+      return res.rows;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserFriends(user: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT * \
+        FROM friends \
+        JOIN users ON user2 = user_id\
+        WHERE user1 = $1',
+        [user],
+      );
+
+      const res2 = await client.query(
+        'SELECT * \
+        FROM friends \
+        JOIN users ON user1 = user_id\
+        WHERE user2 = $1',
+        [user],
+      )
+
+      const final_res = [...res.rows, ...res2.rows];
+      console.log(final_res);
+      return final_res;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async getIsUserFriendsWith(user: string, userToCheck) {
+    let input1 = user;
+    let input2 = userToCheck;
+    if (userToCheck < user){
+      input1 = userToCheck;
+      input2 = user;
+    }
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT * FROM friends WHERE user1 = $1 AND user2 = $2',
+        [input1, input2],
+      );
+
+      if (res.rows.length > 0) {
+        return true;
+      }
+      return false;
+    }
+    catch (e) {
+
     }
   }
 
@@ -139,6 +224,7 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
+
   async updateUserInfo({
     user_id,
     username = null,
@@ -155,34 +241,35 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       if (username !== null) {
-        client.query('UPDATE users SET username = $1 WHERE user_id = $2', [username, user_id]);
+        console.log(username);
+        await client.query('UPDATE users SET username = $1 WHERE user_id = $2', [username, user_id]);
       }
       if (first_name !== null) {
-        client.query('UPDATE users SET first_name = $1 WHERE user_id = $2', [first_name, user_id]);
+        await client.query('UPDATE users SET first_name = $1 WHERE user_id = $2', [first_name, user_id]);
       }
       if (last_name !== null) {
-        client.query('UPDATE users SET last_name = $1 WHERE user_id = $2', [last_name, user_id]);
+        await client.query('UPDATE users SET last_name = $1 WHERE user_id = $2', [last_name, user_id]);
       }
       if (location !== null) {
-        client.query('UPDATE users SET location = $1 WHERE user_id = $2', [location, user_id]);
+        await client.query('UPDATE users SET location = $1 WHERE user_id = $2', [location, user_id]);
       }
       if (dob !== null) {
-        client.query('UPDATE users SET dob = $1 WHERE user_id = $2', [dob, user_id]);
+        await client.query('UPDATE users SET dob = $1 WHERE user_id = $2', [dob, user_id]);
       }
       if (bio !== null) {
-        client.query('UPDATE users SET bio = $1 WHERE user_id = $2', [bio, user_id]);
+        await client.query('UPDATE users SET bio = $1 WHERE user_id = $2', [bio, user_id]);
       }
       if (email !== null) {
-        client.query('UPDATE users SET email = $1 WHERE user_id = $2', [email, user_id]);
+        await client.query('UPDATE users SET email = $1 WHERE user_id = $2', [email, user_id]);
       }
       if (profile_pic !== null) {
-        client.query('UPDATE users SET profile_pic = $1 WHERE user_id = $2', [profile_pic, user_id]);
+        await client.query('UPDATE users SET profile_pic = $1 WHERE user_id = $2', [profile_pic, user_id]);
       }
       if (favourite_playlist !== null) {
-        client.query('UPDATE users SET favourite_playlist = $1 WHERE user_id = $2', [favourite_playlist, user_id]);
+        await client.query('UPDATE users SET favourite_playlist = $1 WHERE user_id = $2', [favourite_playlist, user_id]);
       }
       if (gender !== null) {
-        client.query('UPDATE users SET gender = $1 WHERE user_id = $2', [gender, user_id]);
+        await client.query('UPDATE users SET gender = $1 WHERE user_id = $2', [gender, user_id]);
       }
 
     } catch (e) {
@@ -191,6 +278,37 @@ export class DatabaseService implements OnModuleDestroy {
       client.release();
     }
   }
+
+  async updateUserVector(vector: object, id: string) {
+    const client = await this.pool.connect();
+    try {
+      console.log(vector)
+      const { popularity, danceability, energy, instrumentalness, speechiness, valence, acousticness } = vector as any;
+  
+      const res = await client.query(
+        `
+        INSERT INTO user_vectors (user_id, popularity, danceability, energy, valence, acousticness, speechiness, instrumentalness)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (user_id)
+        DO UPDATE SET 
+          popularity = EXCLUDED.popularity,
+          danceability = EXCLUDED.danceability,
+          energy = EXCLUDED.energy,
+          valence = EXCLUDED.valence,
+          acousticness = EXCLUDED.acousticness,
+          speechiness = EXCLUDED.speechiness,
+          instrumentalness = EXCLUDED.instrumentalness;
+        `,
+        [id, popularity, danceability, energy, valence, acousticness, speechiness, instrumentalness]
+      );
+      return {"message": "success"};
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+  
   
 
   // adds (user, blocked_user) to blocks table
@@ -251,7 +369,7 @@ async add_message(
     const client = await this.pool.connect();
     try {
       const res = await client.query(
-        'DELETE FROM message WHERE messageID = $1 RETURNING *',
+        'DELETE FROM message WHERE message_id = $1 RETURNING *',
         [messageID],
       );
       console.log(res.rows);
@@ -305,19 +423,46 @@ async add_message(
   // sends friend request
   async send_friend_request(sender_id: string, receiver_id: string) {
     const client = await this.pool.connect();
-    // did this to comply with the database constraint for friends
-    let user_id1 = sender_id;
-    let user_id2 = receiver_id;
-    if (receiver_id < sender_id){
-      user_id1 = receiver_id;
-      user_id2 = sender_id;
-    }
+    // removed the constraint from the database
     try {
       const res = await client.query(
         'INSERT INTO friend_request VALUES ($1, $2) RETURNING *',
-        [user_id1, user_id2],
+        [sender_id, receiver_id],
       );
       return res;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserFriendRequests(receiverID: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT sender, profile_pic FROM friend_request \
+        JOIN users ON sender = user_id \
+        WHERE receiver = $1',
+        [receiverID],
+      );
+      return res.rows;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async unfriend(user: string, unfriended: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'DELETE FROM friends \
+        WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)',
+        [user, unfriended],
+      );
+      return res.rows;
     } catch (e) {
       console.log(e);
     } finally {
@@ -329,14 +474,14 @@ async add_message(
   async acceptFriendRequest(receiver_id: string, sender_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
-    // did this to comply with the database constraint for friends
-    let user_id1 = sender_id;
-    let user_id2 = receiver_id;
-    if (receiver_id < sender_id){
-      user_id1 = receiver_id;
-      user_id2 = sender_id;
-    }
+
     try {
+      let user_id1 = sender_id;
+      let user_id2 = receiver_id;
+      if (receiver_id < sender_id){
+        user_id1 = receiver_id;
+        user_id2 = sender_id;
+      }
       const insertFriend = await client.query(
         'INSERT INTO friends (user1, user2) VALUES ($1, $2) RETURNING *',
         [user_id1, user_id2]
@@ -344,7 +489,7 @@ async add_message(
       console.log(insertFriend.rows);
       const deleteRequest = await client.query(
         'DELETE FROM friend_request WHERE receiver = $1 AND sender = $2 RETURNING *',
-        [user_id2, user_id1]
+        [receiver_id, sender_id]
       );
       console.log(deleteRequest.rows);
 
@@ -375,20 +520,11 @@ async add_message(
   async declineFriendRequest(receiver_id: string, sender_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
-
-    // did this to comply with the database constraint for friends
-    let user_id1 = sender_id;
-    let user_id2 = receiver_id;
-    if (receiver_id < sender_id){
-      user_id1 = receiver_id;
-      user_id2 = sender_id;
-    }
     try {
       const deleteRequest = await client.query(
-        'DELETE FROM friendrequest WHERE receiver = $1 AND sender = $2 RETURNING *',
-        [user_id2, user_id1]
+        'DELETE FROM friend_request WHERE receiver = $1 AND sender = $2 RETURNING *',
+        [receiver_id, sender_id]
       );
-      console.log(deleteRequest.rows);
       return deleteRequest;
     } catch (e) {
       console.log(e);
@@ -397,17 +533,17 @@ async add_message(
     }
   }
 
-  // create user settings
-  async create_userSetting(userid: string) {
+  // Create user settings with all parameters
+  async create_user_setting(user_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
-      const create_userSetting = await client.query(
-        'INSERT INTO settings (userid, darkMode, private, notification) VALUES ($1, $2, $3, $4) RETURNING *',
-        [userid, false, false, false]
+      const create_user_setting = await client.query(
+        'INSERT INTO settings (user_id, options, dark_mode, friend_message, friend_visibility, friend_request, playlist_update, new_events, event_reminder) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+        [user_id, true, true, true, true, true, true, true, true]
       );
-      console.log(create_userSetting.rows);
-      return create_userSetting.rows[0];
+      console.log(create_user_setting.rows);
+      return create_user_setting.rows[0];
     } catch (e) {
       console.log(e);
     } finally {
@@ -608,7 +744,7 @@ async add_message(
           user_id2 = sender_id;
         } 
         try {
-            const res = await client.query("DELETE FROM friendrequest WHERE sender = $1 AND receiver = $2 RETURNING *", [user_id1, user_id2]);
+            const res = await client.query("DELETE FROM friend_request WHERE sender = $1 AND receiver = $2 RETURNING *", [user_id1, user_id2]);
             console.log(res.rows);
         return res;
         } 
@@ -674,6 +810,22 @@ async add_message(
         finally {
             client.release();
         }
+    }
+
+    // gets friend requests for a user
+    async get_friend_requests(userID: string) {
+      const client = await this.pool.connect();
+      try {
+      const result = await client.query(
+        'SELECT * FROM friend_request WHERE receiver = $1',
+        [userID]
+      );
+      return result.rows;
+      } catch (e) {
+      console.log(e);
+      } finally {
+      client.release();
+      }
     }
 
     // for testing purposes
@@ -761,7 +913,7 @@ async add_message(
         const client = await this.pool.connect();
         try {
           // Currently this is not working because threadID is thread_id in the database
-            const res = await client.query("DELETE FROM thread WHERE threadID = $1 RETURNING *", [threadID]);
+            const res = await client.query("DELETE FROM thread WHERE thread_id = $1 RETURNING *", [threadID]);
             console.log(res.rows);
             return res;
         } 
