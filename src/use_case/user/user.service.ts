@@ -73,13 +73,11 @@ export class UserService {
     
         if (closest_vec) {
             console.log('Closest Vector:', closest_vec);
-            return closest_vec.user_id;
+            return await this.databaseService.getUser(closest_vec.user_id);
         } else {
             throw new Error('No other users to compare');
         }
     }
-}
-
     async getIsUserFriendsWith(user: string, userToCheck: string) {
         const response = await this.databaseService.getIsUserFriendsWith(user, userToCheck);
         if (response) {
