@@ -22,4 +22,9 @@ export class UserController {
         return this.userService.getUserFriends(id);
 
     }
+
+    @Get('/get_user_match/:id')
+    async getUserMatch(@Param('id') id: string) {
+        return this.userService.getUserMatch(id);
+    }
 }

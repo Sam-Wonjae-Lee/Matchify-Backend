@@ -96,6 +96,18 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
+  async getUserVectors(){
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query('SELECT * FROM user_vectors');
+      return res.rows;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
   // tested by frunk
   async addUserInfo(user_id: string, username: string, first_name: string, last_name: string, location: string, dob: Date, bio: string, email: string, profile_pic: string, favourite_playlist: string, gender: string) {
     const client = await this.pool.connect();
