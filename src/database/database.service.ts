@@ -240,6 +240,37 @@ export class DatabaseService implements OnModuleDestroy {
       client.release();
     }
   }
+
+  async updateUserVector(vector: object, id: string) {
+    const client = await this.pool.connect();
+    try {
+      console.log(vector)
+      const { popularity, danceability, energy, instrumentalness, speechiness, valence, acousticness } = vector as any;
+  
+      const res = await client.query(
+        `
+        INSERT INTO user_vectors (user_id, popularity, danceability, energy, valence, acousticness, speechiness, instrumentalness)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (user_id)
+        DO UPDATE SET 
+          popularity = EXCLUDED.popularity,
+          danceability = EXCLUDED.danceability,
+          energy = EXCLUDED.energy,
+          valence = EXCLUDED.valence,
+          acousticness = EXCLUDED.acousticness,
+          speechiness = EXCLUDED.speechiness,
+          instrumentalness = EXCLUDED.instrumentalness;
+        `,
+        [id, popularity, danceability, energy, valence, acousticness, speechiness, instrumentalness]
+      );
+      return {"message": "success"};
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+  
   
 
   // adds (user, blocked_user) to blocks table
