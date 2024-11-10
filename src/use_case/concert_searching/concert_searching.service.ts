@@ -25,4 +25,8 @@ export class ConcertSearchingService {
         
         return list_of_concerts;
     }
+
+    // createThreadTable() {
+    //     this.databaseService.createDirectThreadTable();
+    // }
 }

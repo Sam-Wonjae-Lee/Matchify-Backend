@@ -27,6 +27,30 @@ export class DatabaseService implements OnModuleDestroy {
     await this.pool.end();
   }
 
+
+  //  async createDirectThreadTable(): Promise<void> {
+  //       const client = await this.pool.connect();
+  //       try {
+  //           const createTableQuery = `
+  //               CREATE TABLE IF NOT EXISTS direct_thread (
+  //                   user1_id TEXT NOT NULL,
+  //                   user2_id TEXT NOT NULL,
+  //                   thread_id INT NOT NULL UNIQUE,
+  //                   PRIMARY KEY (user1_id, user2_id),
+  //                   FOREIGN KEY (user1_id) REFERENCES users(user_id),
+  //                   FOREIGN KEY (user2_id) REFERENCES users(user_id),
+  //                   FOREIGN KEY (thread_id) REFERENCES thread(thread_id)
+  //               );
+  //           `;
+  //           await client.query(createTableQuery);
+  //           console.log('direct_thread table created successfully');
+  //       } catch (e) {
+  //           console.error('Error creating direct_thread table:', e);
+  //       } finally {
+  //           client.release();
+  //       }
+  //   }
+
   async getAllRefreshTokens() {
     const client = await this.pool.connect();
     try {
@@ -40,6 +64,7 @@ export class DatabaseService implements OnModuleDestroy {
       client.release();
     }
   }
+
 
   async addAccessRefreshToken(user: string, access_token: string, refresh_token: string) {
     const client = await this.pool.connect();
@@ -105,7 +130,7 @@ export class DatabaseService implements OnModuleDestroy {
         ORDER BY RANDOM() LIMIT $2',
         [user_id, limit],
       );
-      return res.rows;
+      return res.rows.map(row => row.friend);
     } catch (e) {
       console.log(e);
     } finally {
@@ -319,27 +344,25 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  // message use case
-  async add_message(
-    messageID: number,
+async add_message(
     userID: string,
     threadID: number,
     content: string,
-  ) {
+) {
     const client = await this.pool.connect();
     try {
-      const res = await client.query(
-        'INSERT INTO message VALUES ($1, $2, $3, $4, NOW()) RETURNING *',
-        [messageID, userID, threadID, content],
-      );
-      console.log(res.rows);
-      return res;
+        const res = await client.query(
+            'INSERT INTO message (user_id, thread_id, content, created_at) VALUES ($1, $2, $3, NOW()) RETURNING *',
+            [userID, threadID, content],
+        );
+        console.log(res.rows);
+        return res;
     } catch (e) {
-      console.log(e);
+        console.log(e);
     } finally {
-      client.release();
+        client.release();
     }
-  }
+}
 
   // removes message from thread
   async remove_message(messageID: number) {
@@ -356,6 +379,45 @@ export class DatabaseService implements OnModuleDestroy {
     } finally {
       client.release();
     }
+  }
+
+  async get_direct_thread(user1_id: string, user2_id: string): Promise<number | null> {
+      const client = await this.pool.connect();
+      try {
+          const res = await client.query(
+              `SELECT thread_id FROM direct_thread 
+              WHERE (user1_id = $1 AND user2_id = $2) 
+                  OR (user1_id = $2 AND user2_id = $1)`,
+              [user1_id, user2_id]
+          );
+          if (res.rows.length > 0) {
+              return res.rows[0].thread_id;
+          }
+          return null;
+      } catch (e) {
+          console.log(e);
+          throw e;
+      } finally {
+          client.release();
+      }
+  }
+
+  async get_messages(threadID: number) {
+      const client = await this.pool.connect();
+      try {
+          // Fetch messages for the obtained thread_id
+          console.log(threadID);
+          const res = await client.query(
+              'SELECT * FROM message WHERE thread_id = $1',
+              [threadID],
+          );
+          console.log(res.rows);
+          return res.rows;
+      } catch (e) {
+          console.log(e);
+      } finally {
+          client.release();
+      }
   }
 
   // sends friend request
@@ -430,9 +492,22 @@ export class DatabaseService implements OnModuleDestroy {
         [receiver_id, sender_id]
       );
       console.log(deleteRequest.rows);
+
+      // Get the next thread ID
+      const threadID = await this.getNextThreadID();
+
+      // Create a new thread for the direct message
+      const threadName = `Direct message between ${user_id1} and ${user_id2}`;
+      const threadRes = await this.add_thread(threadID, threadName);
+
+      // Add entry to direct_thread table
+      const directThreadRes = await this.addDirectThread(user_id1, user_id2, threadID);
+      console.log(directThreadRes.rows);
       return {
         insertFriend,
         deleteRequest,
+        threadRes,
+        directThreadRes,
       };
     } catch (e) {
       console.log(e);
@@ -820,6 +895,20 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
 
+    async getNextThreadID(): Promise<number> {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("SELECT COALESCE(MAX(thread_id), 0) + 1 AS next_thread_id FROM thread");
+            console.log(res.rows);
+            return res.rows[0].next_thread_id;
+        } catch (e) {
+            console.log(e);
+            throw e;
+        } finally {
+            client.release();
+        }
+    }
+
     async remove_thread(threadID: number) {
         const client = await this.pool.connect();
         try {
@@ -832,6 +921,23 @@ export class DatabaseService implements OnModuleDestroy {
             console.log(e);
         } 
         finally {
+            client.release();
+        }
+    }
+
+    async addDirectThread(user1_id: string, user2_id: string, thread_id: number) {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query(
+                "INSERT INTO direct_thread (user1_id, user2_id, thread_id) VALUES ($1, $2, $3) RETURNING *",
+                [user1_id, user2_id, thread_id]
+            );
+            console.log(res.rows);
+            return res;
+        } catch (e) {
+            console.log(e);
+            throw e;
+        } finally {
             client.release();
         }
     }

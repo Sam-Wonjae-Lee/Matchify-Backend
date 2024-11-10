@@ -10,8 +10,8 @@ export class MessageService {
 
     // adds message onto the database
     addmessage(addMessageDto: AddMessageDto) {
-        const {message_id, user_id, thread_id, content} = addMessageDto;
-        this.databaseService.add_message(message_id, user_id, thread_id, content);
+        const {userID, threadID, content} = addMessageDto;
+        this.databaseService.add_message(userID, threadID, content);
     }
 
     // removes messageid from the database

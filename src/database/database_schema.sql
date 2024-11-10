@@ -158,3 +158,13 @@ CREATE TABLE tokens (
     refresh_token TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
+
+CREATE TABLE direct_thread (
+    user1_id TEXT NOT NULL,
+    user2_id TEXT NOT NULL,
+    thread_id INT NOT NULL UNIQUE,
+    PRIMARY KEY (user1_id, user2_id),
+    FOREIGN KEY (user1_id) REFERENCES users(user_id),
+    FOREIGN KEY (user2_id) REFERENCES users(user_id),
+    FOREIGN KEY (thread_id) REFERENCES thread(thread_id)
+);
