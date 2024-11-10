@@ -32,6 +32,11 @@ export class UserController {
         return await this.userService.getIsUserFriendsWith(id, userToCheck);
     }
 
+    @Get('/get_user_match/:id')
+    async getUserMatch(@Param('id') id: string) {
+        return this.userService.getUserMatch(id);
+    }
+
     @Post('/unfriend/:id')
     async unfriend(@Param('id') id: string, @Body('unfriended') unfriended: string) {
         return await this.userService.unfriend(id, unfriended);
