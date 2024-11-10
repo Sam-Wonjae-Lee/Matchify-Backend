@@ -172,7 +172,11 @@ export class DatabaseService implements OnModuleDestroy {
         return true;
       }
       return false;
+    }
+    catch (e) {
 
+    }
+  }
 
   async addUserInfo(user_id: string, username: string, first_name: string, last_name: string, location: string, dob: Date, bio: string, email: string, profile_pic: string, favourite_playlist: string, gender: string) {
     const client = await this.pool.connect();
