@@ -9,7 +9,9 @@ export class MessageController {
 
     @Post('/addmessage')
     message(@Body() addMessageDto: AddMessageDto) {
-        return this.messageService.addmessage(addMessageDto);
+        const {user_id, thread_id, content} = addMessageDto;
+        console.log(user_id, thread_id, content);
+        return this.messageService.addmessage({user_id, thread_id, content});
     }
 
     @Post('/removemessage')
