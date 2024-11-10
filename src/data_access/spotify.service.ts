@@ -75,6 +75,27 @@ export class SpotifyService implements OnApplicationBootstrap{
     return data;
   }
 
+  public async getAudioFeatures(trackIds: string[], userId: string): Promise<any> {
+    try {
+
+      // Prepare the track IDs as a comma-separated string
+      const trackIdsString = trackIds.join(',');
+      const accessToken = await this.databaseService.getUserAccessToken(userId);
+      // Make the request to Spotify's Audio Features endpoint
+      const response = await fetch(`https://api.spotify.com/v1/audio-features?ids=${trackIdsString}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,  // Include the authorization token
+        },
+      });
+
+      // Return the data from Spotify API
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching audio features:', error);
+      throw new Error('Failed to fetch audio features');
+    }
+  }
+
   public async createAccount(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender, access_token, refresh_token) {
     const insertionData = await this.databaseService.addUserInfo(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender);
     await this.databaseService.addAccessRefreshToken(user_id, access_token, refresh_token);

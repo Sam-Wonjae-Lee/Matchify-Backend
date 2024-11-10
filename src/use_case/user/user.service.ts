@@ -15,6 +15,11 @@ export class UserService {
         return await this.databaseService.updateUserInfo({user_id: id, bio, location, gender, favourite_playlist: fav_playlist, dob})
     }
 
+    async updateUserVector(vector: object, id: string) {
+        console.log("WPDOKDPWO")
+        return await this.databaseService.updateUserVector(vector, id);
+    }
+
     async getUserFriends(user: string){
         return await this.databaseService.getUserFriends(user);
     }

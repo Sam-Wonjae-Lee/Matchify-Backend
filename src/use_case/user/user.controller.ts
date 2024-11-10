@@ -16,6 +16,11 @@ export class UserController {
         const {bio, location, gender, fav_playlist, dob} = postUserDto;
         return await this.userService.updateUser(id, bio, location, gender, fav_playlist, dob);
     }
+
+    @Post('/vector/:id')
+    async updateUserVector(@Param('id') id: string, @Body() vector: any) {
+        return await this.userService.updateUserVector(vector.body.vector, id);
+    }
   
     @Get('/get_user_friends/:id')
     async getUserFriends(@Param('id') id: string) {
