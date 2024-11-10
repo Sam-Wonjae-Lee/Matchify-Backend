@@ -1,4 +1,4 @@
-import { Injectable, HttpException, Redirect } from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { off } from 'process';
 import { DatabaseService } from 'src/database/database.service';
 
@@ -9,7 +9,7 @@ export interface ProfileObject {
 }
 
 @Injectable()
-export class SpotifyService {
+export class SpotifyService implements OnApplicationBootstrap{
 
   private clientID: string;
   private clientSecret: string;
@@ -21,8 +21,39 @@ export class SpotifyService {
     this.redirectURI = process.env.SPOTIFY_REDIRECT_URI;
   }
 
+  /** 
+   * Runs on backend startup and refreshes all users tokens
+   * Necessary so that users can visit other user profiles
+   * */ 
+  onApplicationBootstrap() {
 
-  
+    const refreshAllTokens = async () => {
+      const rows = await this.databaseService.getAllRefreshTokens();
+      for (let i = 0; i < rows.length; i++) {
+        const response = await fetch('https://accounts.spotify.com/api/token', {
+          method: 'POST', 
+          body: new URLSearchParams({
+            'grant_type': 'refresh_token',
+            'refresh_token': rows[i].refresh_token,
+          }),
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Basic ' + (Buffer.from(this.clientID + ':' + this.clientSecret).toString('base64')),
+          },
+        });
+
+        if (!response.ok) {
+            console.log("REFRESHING TOKEN FAILED");
+            return;
+        }
+        const data = await response.json();
+        await this.databaseService.addAccessRefreshToken(rows[i].user_id, data.access_token, data.refresh_token ? data.refresh_token : rows[i].refresh_token);
+      }
+      console.log("FINISHED REFRESHING ALL TOKENS ON STARTUP");
+    }
+    refreshAllTokens();
+  }
+
   /**
    * Get the current user's profile. In other words, get detailed profile information about the current user.
    * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile
@@ -42,6 +73,27 @@ export class SpotifyService {
 
     const data = await response.json();
     return data;
+  }
+
+  public async getAudioFeatures(trackIds: string[], userId: string): Promise<any> {
+    try {
+
+      // Prepare the track IDs as a comma-separated string
+      const trackIdsString = trackIds.join(',');
+      const accessToken = await this.databaseService.getUserAccessToken(userId);
+      // Make the request to Spotify's Audio Features endpoint
+      const response = await fetch(`https://api.spotify.com/v1/audio-features?ids=${trackIdsString}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,  // Include the authorization token
+        },
+      });
+
+      // Return the data from Spotify API
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching audio features:', error);
+      throw new Error('Failed to fetch audio features');
+    }
   }
 
   public async createAccount(user_id, username, first_name, last_name, location, dob, bio, email, profile_pic, favourite_playlist, gender, access_token, refresh_token) {
@@ -94,7 +146,7 @@ export class SpotifyService {
    * @returns URL for Spotify Authorization
    */
   public getAuthUrl(): string {
-    const scope = 'user-read-private user-read-email user-top-read'; // Permissions for authorization
+    const scope = 'user-read-private user-read-email user-top-read user-read-playback-state'; // Permissions for authorization
     const authURL = `https://accounts.spotify.com/authorize?client_id=${this.clientID}&redirect_uri=${encodeURIComponent(this.redirectURI)}&scope=${encodeURIComponent(scope)}&response_type=code`;
     return authURL;
   }
@@ -151,6 +203,22 @@ export class SpotifyService {
   }
 
   /**
+   * Get a playlist. 
+   * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-playlist
+   */
+  public async getPlaylist(playlistId: string, userId: string) {
+    const accessToken = await this.databaseService.getUserAccessToken(userId);
+
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+    const data = await response.json();
+    return data;
+  }
+
+  /**
    * Get the tracks/items from a playlist. 
    * More info is located here: https://developer.spotify.com/documentation/web-api/reference/get-playlists-tracks
    * @param playlistId A string containing the Spotify playlist ID.
@@ -160,7 +228,7 @@ export class SpotifyService {
 
     const accessToken = await this.databaseService.getUserAccessToken(userId);
 
-    console.log(accessToken);
+    // console.log(accessToken);
 
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`, {
       headers: {
@@ -223,7 +291,9 @@ export class SpotifyService {
       throw new Error(`Failed to retrieve user's top tracks: ${errorText}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(data);
+    return data;
   }
 
   /**
@@ -251,7 +321,9 @@ export class SpotifyService {
       throw new Error(`Failed to retrieve user's top artists`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log(data);
+    return data;
   }
 
   /**
@@ -281,4 +353,32 @@ export class SpotifyService {
 
     return genreCounts;
   }
+
+  public getCurrentPlaybackState = async (userId: string) => {
+    const accessToken = await this.databaseService.getUserAccessToken(userId);
+
+    const response = await fetch('https://api.spotify.com/v1/me/player', {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('Response error message:', errorText);
+      return null;
+    }
+
+    const responseBody = await response.text();
+
+    // handles case if user is not playing music
+    if (responseBody) {
+      const data = JSON.parse(responseBody);
+      console.log(data);
+      return data.item.name;
+    }
+    return null;
+  }
+
+
 }

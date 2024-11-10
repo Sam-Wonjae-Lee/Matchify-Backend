@@ -62,8 +62,7 @@ CREATE TABLE friends (
     user2 TEXT NOT NULL,
     PRIMARY KEY (user1, user2),
     FOREIGN KEY (user1) REFERENCES users(user_id),
-    FOREIGN KEY (user2) REFERENCES users(user_id),
-    CHECK (user1 < user2)
+    FOREIGN KEY (user2) REFERENCES users(user_id)
 );
 
 -- very good block --
@@ -81,7 +80,7 @@ CREATE TABLE friend_request (
     receiver TEXT NOT NULL,
     PRIMARY KEY (sender, receiver),
     FOREIGN KEY (sender) REFERENCES users(user_id),
-    FOREIGN KEY (receiver) REFERENCES users(user_id),
+    FOREIGN KEY (receiver) REFERENCES users(user_id)
 );
 
 --please check options for settings--
@@ -106,7 +105,9 @@ CREATE TABLE concert (
     concert_date TEXT NOT NULL,
     link TEXT NOT NULL,
     venue TEXT NOT NULL,
-    genre TEXT NOT NULL
+    genre TEXT NOT NULL,
+    -- concert_month TEXT NOT NULL,
+    popularity_rank INT NOT NULL
 );
 
 CREATE TABLE user_concert (

@@ -15,6 +15,11 @@ export class UserService {
         return await this.databaseService.updateUserInfo({user_id: id, bio, location, gender, favourite_playlist: fav_playlist, dob})
     }
 
+    async updateUserVector(vector: object, id: string) {
+        console.log("WPDOKDPWO")
+        return await this.databaseService.updateUserVector(vector, id);
+    }
+
     async getUserFriends(user: string){
         return await this.databaseService.getUserFriends(user);
     }
@@ -72,5 +77,18 @@ export class UserService {
         } else {
             throw new Error('No other users to compare');
         }
+    }
+}
+
+    async getIsUserFriendsWith(user: string, userToCheck: string) {
+        const response = await this.databaseService.getIsUserFriendsWith(user, userToCheck);
+        if (response) {
+            return {status: true}
+        }
+        return {status: false}
+    }
+
+    async unfriend(user: string, unfriended: string) {
+        return await this.databaseService.unfriend(user, unfriended);
     }
 }

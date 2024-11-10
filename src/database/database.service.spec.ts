@@ -27,7 +27,9 @@ describe('DatabaseService (Integration)', () => {
       database: process.env.DB_DATABASE,
     });
 
-    await pool.query(resetTablesQuery);
+    if (process.env.DB_PORT === '26774') {
+      await pool.query(resetTablesQuery);
+    }
   });
 
   afterAll(async () => {
@@ -44,7 +46,7 @@ describe('DatabaseService (Integration)', () => {
   });
   it('users send friends requests', async () => {
     await service.send_friend_request('b','a');
-    const result1 = await pool.query('SELECT * FROM friend_request WHERE sender = $1 AND receiver = $2', ['a', 'b']);
+    const result1 = await pool.query('SELECT * FROM friend_request WHERE sender = $1 AND receiver = $2', ['b', 'a']);
     expect(result1.rows.length).toBe(1);
   });
   it('users accept friends requests', async () => {
@@ -127,4 +129,80 @@ describe('DatabaseService (Integration)', () => {
     const result = await pool.query('SELECT * FROM blocks WHERE blocker = $1 AND blocked = $2', ['e', 'f']);
     expect(result.length).toBe(1);
   });
+=======
+  it('should flip the dark_mode value in settings (testing settings use case)', async () => {
+    const user_id = 'a'; // Set user_id to 'a'
+
+    // Initial setup: Add a setting with default boolean values
+    await service.create_user_setting(user_id);
+    
+    // Query the initial value of dark_mode
+    let result = await pool.query('SELECT dark_mode FROM settings WHERE user_id = $1', [user_id]);
+    expect(result.rows.length).toBe(1);
+    expect(result.rows[0].dark_mode).toBe(true);
+    
+    // Call the service method to flip the dark_mode value
+    await service.update_dark_mode(user_id);
+    
+    // Query the value after flipping
+    result = await pool.query('SELECT dark_mode FROM settings WHERE user_id = $1', [user_id]);
+    expect(result.rows.length).toBe(1);
+    expect(result.rows[0].dark_mode).toBe(false);
+  });
+  it('should add a thread, add a message to the thread, and then remove both (testing thread and message use case)', async () => {
+    // Add a thread to the database
+    await service.add_thread(1, 'Test Thread');
+
+    // Query the added thread
+    let result = await pool.query('SELECT * FROM thread WHERE thread_id = $1', [1]);
+    expect(result.rows.length).toBe(1);
+
+    const messageID = 1; // Set messageID to 1
+    const userID = 'a'; // Set userID to 'a'
+    const threadID = 1; // Set threadID to 1
+    const content = 'Hello, world!'; // Set content to 'Hello, world!'
+
+    // Call the service method to add a message
+    await service.add_message(messageID, userID, threadID, content);
+
+    // Query the added message
+    const result1 = await pool.query('SELECT * FROM message WHERE message_id = $1', [messageID]);
+    expect(result1.rows.length).toBe(1);
+    expect(result1.rows[0].user_id).toBe(userID);
+    expect(result1.rows[0].thread_id).toBe(threadID);
+    expect(result1.rows[0].content).toBe(content);
+
+    // Call the service method to remove the added message
+    await service.remove_message(messageID);
+
+    // Query the removed message
+    const result2 = await pool.query('SELECT * FROM message WHERE message_id = $1', [messageID]);
+    expect(result2.rows.length).toBe(0);
+
+    // Remove the thread from the database
+    await service.remove_thread(threadID);
+
+    // Query the removed thread
+    const result3 = await pool.query('SELECT * FROM thread WHERE thread_id = $1', [threadID]);
+    expect(result3.rows.length).toBe(0);
+  });
+  it('should add a block and unblock (testing block and unblock use case)', async () => {
+    const blocker = 'a'; // Set blocker to 'a'
+    const blocked = 'b'; // Set blocked to 'b'
+
+    // Call the service method to add a block
+    await service.blockUser(blocker, blocked);
+
+    // Query the blocked user
+    const result1 = await pool.query('SELECT * FROM blocks WHERE blocker = $1 AND blocked = $2', [blocker, blocked]);
+    expect(result1.rows.length).toBe(1);
+
+    // Call the service method to remove the block
+    await service.unblockUser(blocker, blocked);
+
+    // Query the unblocked user
+    const result2 = await pool.query('SELECT * FROM blocks WHERE blocker = $1 AND blocked = $2', [blocker, blocked]);
+    expect(result2.rows.length).toBe(0);
+  });
+
 });

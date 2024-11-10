@@ -1,9 +1,9 @@
-import { IsInt } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class RequestDecisionDto {
-  @IsInt()
+  @IsString()
   readonly receiver_id: string;
 
-  @IsInt()
+  @IsString()
   readonly sender_id: string;
 }

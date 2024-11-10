@@ -2,13 +2,13 @@ import { IsInt, IsString } from 'class-validator';
 
 export class AddMessageDto {
   @IsInt()
-  messageID: number;
+  message_id: number;
 
   @IsString()
-  userID: string;
+  user_id: string;
 
   @IsInt()
-  threadID: number;
+  thread_id: number;
 
   @IsString()
   content: string;

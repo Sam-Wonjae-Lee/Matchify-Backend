@@ -27,6 +27,20 @@ export class DatabaseService implements OnModuleDestroy {
     await this.pool.end();
   }
 
+  async getAllRefreshTokens() {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT user_id, refresh_token FROM tokens'
+      );
+      return res.rows;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
   async addAccessRefreshToken(user: string, access_token: string, refresh_token: string) {
     const client = await this.pool.connect();
     try {
@@ -80,13 +94,16 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  // tested works
-  async getUserFriends(user: string) {
+  async getUnfriendedAndNotPendingUsers(limit: number, user_id: string) {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
-        'SELECT * FROM friends WHERE user1 = $1 OR user2 = $2',
-        [user, user],
+        'SELECT * FROM users \
+        WHERE user_id <> $1 \
+        AND NOT EXISTS (SELECT * FROM friends WHERE (user1 = user_id AND user2 = $1) OR (user1 = $1 AND user2 = user_id)) \
+        AND NOT EXISTS (SELECT * FROM friend_request WHERE (sender = user_id AND receiver = $1) OR (sender = $1 AND receiver = user_id)) \
+        ORDER BY RANDOM() LIMIT $2',
+        [user_id, limit],
       );
       return res.rows;
     } catch (e) {
@@ -108,7 +125,55 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  // tested by frunk
+  async getUserFriends(user: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT * \
+        FROM friends \
+        JOIN users ON user2 = user_id\
+        WHERE user1 = $1',
+        [user],
+      );
+
+      const res2 = await client.query(
+        'SELECT * \
+        FROM friends \
+        JOIN users ON user1 = user_id\
+        WHERE user2 = $1',
+        [user],
+      )
+
+      const final_res = [...res.rows, ...res2.rows];
+      console.log(final_res);
+      return final_res;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async getIsUserFriendsWith(user: string, userToCheck) {
+    let input1 = user;
+    let input2 = userToCheck;
+    if (userToCheck < user){
+      input1 = userToCheck;
+      input2 = user;
+    }
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT * FROM friends WHERE user1 = $1 AND user2 = $2',
+        [input1, input2],
+      );
+
+      if (res.rows.length > 0) {
+        return true;
+      }
+      return false;
+
+
   async addUserInfo(user_id: string, username: string, first_name: string, last_name: string, location: string, dob: Date, bio: string, email: string, profile_pic: string, favourite_playlist: string, gender: string) {
     const client = await this.pool.connect();
     try {
@@ -184,6 +249,37 @@ export class DatabaseService implements OnModuleDestroy {
       client.release();
     }
   }
+
+  async updateUserVector(vector: object, id: string) {
+    const client = await this.pool.connect();
+    try {
+      console.log(vector)
+      const { popularity, danceability, energy, instrumentalness, speechiness, valence, acousticness } = vector as any;
+  
+      const res = await client.query(
+        `
+        INSERT INTO user_vectors (user_id, popularity, danceability, energy, valence, acousticness, speechiness, instrumentalness)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (user_id)
+        DO UPDATE SET 
+          popularity = EXCLUDED.popularity,
+          danceability = EXCLUDED.danceability,
+          energy = EXCLUDED.energy,
+          valence = EXCLUDED.valence,
+          acousticness = EXCLUDED.acousticness,
+          speechiness = EXCLUDED.speechiness,
+          instrumentalness = EXCLUDED.instrumentalness;
+        `,
+        [id, popularity, danceability, energy, valence, acousticness, speechiness, instrumentalness]
+      );
+      return {"message": "success"};
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+  
   
 
   // adds (user, blocked_user) to blocks table
@@ -246,7 +342,7 @@ export class DatabaseService implements OnModuleDestroy {
     const client = await this.pool.connect();
     try {
       const res = await client.query(
-        'DELETE FROM message WHERE messageID = $1 RETURNING *',
+        'DELETE FROM message WHERE message_id = $1 RETURNING *',
         [messageID],
       );
       console.log(res.rows);
@@ -261,19 +357,46 @@ export class DatabaseService implements OnModuleDestroy {
   // sends friend request
   async send_friend_request(sender_id: string, receiver_id: string) {
     const client = await this.pool.connect();
-    // did this to comply with the database constraint for friends
-    let user_id1 = sender_id;
-    let user_id2 = receiver_id;
-    if (receiver_id < sender_id){
-      user_id1 = receiver_id;
-      user_id2 = sender_id;
-    }
+    // removed the constraint from the database
     try {
       const res = await client.query(
         'INSERT INTO friend_request VALUES ($1, $2) RETURNING *',
-        [user_id1, user_id2],
+        [sender_id, receiver_id],
       );
       return res;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserFriendRequests(receiverID: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'SELECT sender, profile_pic FROM friend_request \
+        JOIN users ON sender = user_id \
+        WHERE receiver = $1',
+        [receiverID],
+      );
+      return res.rows;
+    } catch (e) {
+      console.log(e);
+    } finally {
+      client.release();
+    }
+  }
+
+  async unfriend(user: string, unfriended: string) {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        'DELETE FROM friends \
+        WHERE (user1 = $1 AND user2 = $2) OR (user1 = $2 AND user2 = $1)',
+        [user, unfriended],
+      );
+      return res.rows;
     } catch (e) {
       console.log(e);
     } finally {
@@ -285,14 +408,14 @@ export class DatabaseService implements OnModuleDestroy {
   async acceptFriendRequest(receiver_id: string, sender_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
-    // did this to comply with the database constraint for friends
-    let user_id1 = sender_id;
-    let user_id2 = receiver_id;
-    if (receiver_id < sender_id){
-      user_id1 = receiver_id;
-      user_id2 = sender_id;
-    }
+
     try {
+      let user_id1 = sender_id;
+      let user_id2 = receiver_id;
+      if (receiver_id < sender_id){
+        user_id1 = receiver_id;
+        user_id2 = sender_id;
+      }
       const insertFriend = await client.query(
         'INSERT INTO friends (user1, user2) VALUES ($1, $2) RETURNING *',
         [user_id1, user_id2]
@@ -300,7 +423,7 @@ export class DatabaseService implements OnModuleDestroy {
       console.log(insertFriend.rows);
       const deleteRequest = await client.query(
         'DELETE FROM friend_request WHERE receiver = $1 AND sender = $2 RETURNING *',
-        [user_id2, user_id1]
+        [receiver_id, sender_id]
       );
       console.log(deleteRequest.rows);
       return {
@@ -318,20 +441,11 @@ export class DatabaseService implements OnModuleDestroy {
   async declineFriendRequest(receiver_id: string, sender_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
-
-    // did this to comply with the database constraint for friends
-    let user_id1 = sender_id;
-    let user_id2 = receiver_id;
-    if (receiver_id < sender_id){
-      user_id1 = receiver_id;
-      user_id2 = sender_id;
-    }
     try {
       const deleteRequest = await client.query(
-        'DELETE FROM friendrequest WHERE receiver = $1 AND sender = $2 RETURNING *',
-        [user_id2, user_id1]
+        'DELETE FROM friend_request WHERE receiver = $1 AND sender = $2 RETURNING *',
+        [receiver_id, sender_id]
       );
-      console.log(deleteRequest.rows);
       return deleteRequest;
     } catch (e) {
       console.log(e);
@@ -340,17 +454,17 @@ export class DatabaseService implements OnModuleDestroy {
     }
   }
 
-  // create user settings
-  async create_userSetting(userid: string) {
+  // Create user settings with all parameters
+  async create_user_setting(user_id: string) {
     console.log(process.env.DB_PASSWORD as string);
     const client = await this.pool.connect();
     try {
-      const create_userSetting = await client.query(
-        'INSERT INTO settings (userid, darkMode, private, notification) VALUES ($1, $2, $3, $4) RETURNING *',
-        [userid, false, false, false]
+      const create_user_setting = await client.query(
+        'INSERT INTO settings (user_id, options, dark_mode, friend_message, friend_visibility, friend_request, playlist_update, new_events, event_reminder) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+        [user_id, true, true, true, true, true, true, true, true]
       );
-      console.log(create_userSetting.rows);
-      return create_userSetting.rows[0];
+      console.log(create_user_setting.rows);
+      return create_user_setting.rows[0];
     } catch (e) {
       console.log(e);
     } finally {
@@ -551,7 +665,7 @@ export class DatabaseService implements OnModuleDestroy {
           user_id2 = sender_id;
         } 
         try {
-            const res = await client.query("DELETE FROM friendrequest WHERE sender = $1 AND receiver = $2 RETURNING *", [user_id1, user_id2]);
+            const res = await client.query("DELETE FROM friend_request WHERE sender = $1 AND receiver = $2 RETURNING *", [user_id1, user_id2]);
             console.log(res.rows);
         return res;
         } 
@@ -568,7 +682,7 @@ export class DatabaseService implements OnModuleDestroy {
       const client = await this.pool.connect();
       try {
         const res = await client.query<{ concert_count: number }>(
-          "SELECT COUNT(*) AS concert_count FROM concert WHERE concertid= $1;",
+          "SELECT COUNT(*) AS concert_count FROM concert WHERE concert_id= $1;",
           [concert_id]
         );
         return (res.rows[0].concert_count >= 1);
@@ -587,10 +701,11 @@ export class DatabaseService implements OnModuleDestroy {
         name: string;
         location: string;
         url: string;
-        date: Date;
+        date: string;
         image: string;
         venue: string;
         genre: string;
+        popularity_rank: number;
     }[]) {
         const client = await this.pool.connect();
         try {
@@ -600,8 +715,8 @@ export class DatabaseService implements OnModuleDestroy {
                   console.log("concert already exists");
                 }
                 else {
-                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *", 
-                      [concert.concert_id, concert.name, concert.location, concert.url, concert.image, concert.venue, concert.date, concert.genre]);
+                    const res = await client.query("INSERT INTO concert VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *", 
+                      [concert.concert_id, concert.name, concert.location, concert.image, concert.date, concert.url, concert.venue, concert.genre, concert.popularity_rank]);
                     console.log(concert);
                 }
 
@@ -618,12 +733,48 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
 
+    // gets friend requests for a user
+    async get_friend_requests(userID: string) {
+      const client = await this.pool.connect();
+      try {
+      const result = await client.query(
+        'SELECT * FROM friend_request WHERE receiver = $1',
+        [userID]
+      );
+      return result.rows;
+      } catch (e) {
+      console.log(e);
+      } finally {
+      client.release();
+      }
+    }
+
+    // for testing purposes
+    async _delete_all_concerts() {
+        const client = await this.pool.connect();
+        try {
+            const res = await client.query("DELETE FROM concert RETURNING *");
+            console.log(res.rows);
+            return res;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
+
 
     // delete concerts with dates before the current
     async delete_old_concerts() {
         const client = await this.pool.connect();
         try {
-            const res = await client.query("DELETE FROM concert WHERE date < NOW() RETURNING *");
+            const res = await client.query("DELETE FROM concert WHERE CAST(concert_date AS DATE) < NOW() RETURNING *");
+            // const res = await client.query("SELECT concert_date FROM concert");
+            // const res = await client.query("DELETE FROM concert RETURNING *");
+            console.log(res.rows);
+
             return res;
         } 
         catch (e) {
@@ -634,10 +785,12 @@ export class DatabaseService implements OnModuleDestroy {
         }
     }
    
-    async search_concert() {
+    async search_concert(concert_name: string) {
       const client = await this.pool.connect();
       try{
-
+        const res = await client.query("SELECT * FROM concert WHERE concert_name ILIKE $1 LIMIT 8", [`%${concert_name}%`]);
+        console.log(res.rows);
+        return res.rows;
       }
       catch (e){
         console.log(e);
@@ -667,7 +820,7 @@ export class DatabaseService implements OnModuleDestroy {
         const client = await this.pool.connect();
         try {
           // Currently this is not working because threadID is thread_id in the database
-            const res = await client.query("DELETE FROM thread WHERE threadID = $1 RETURNING *", [threadID]);
+            const res = await client.query("DELETE FROM thread WHERE thread_id = $1 RETURNING *", [threadID]);
             console.log(res.rows);
             return res;
         } 
@@ -713,8 +866,42 @@ export class DatabaseService implements OnModuleDestroy {
     async is_user_attending_concert(userID: string, concertID: string) {
         const client = await this.pool.connect();
         try {
-            const res = await client.query("SELECT COUNT(*) FROM user_concert WHERE userID = $1 AND concertID = $2", [userID, concertID]);
-            return res;
+            const res = await client.query("SELECT COUNT(*) FROM user_concert WHERE user_id = $1 AND concert_id = $2", [userID, concertID]);
+            console.log(res.rows);
+            return res.rows[0].count;
+        } 
+        catch (e) {
+            console.log(e);
+        } 
+        finally {
+            client.release();
+        }
+    }
+
+    // TODO: still needs alot work here
+    async get_concerts(userID: string) {
+        const client = await this.pool.connect();
+        console.log(userID);
+        try {
+            // const favorite_artist = await client.query("SELECT favorite_artist FROM users WHERE user_id = $1", [userID]);
+            // const res = await client.query("SELECT * FROM concert_artist WHERE artist_name = $1 LIMIT 8", [favorite_artist]);
+            // let count = res.rows.length
+            let count = 0;
+
+            // if (count < 8) {
+                let remaining = 8 - count;
+                const res = await client.query("SELECT * FROM concert WHERE concert_id NOT IN (SELECT concert_id FROM concert_artist WHERE artist_name = $1) ORDER BY popularity_rank ASC LIMIT $2", ["favorite_artist", remaining]);
+                // res.rows.push(res2.rows[0]);
+                count++;
+            // }
+
+            // while (count < 8) {
+            //     const res2 = await client.query("SELECT * FROM concert");
+            //     res.rows.push(res2.rows[0]);
+            //     count++;
+            // }
+            
+            return {concerts: res.rows, success: true};
         } 
         catch (e) {
             console.log(e);

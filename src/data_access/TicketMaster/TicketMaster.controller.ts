@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Post, Param, Get } from '@nestjs/common';
 import { TicketMasterService } from './TicketMaster.service';
 
 
@@ -6,9 +6,9 @@ import { TicketMasterService } from './TicketMaster.service';
 export class TicketMasterController {
   constructor(private readonly ticketmasterService: TicketMasterService) {}
 
-  @Get('new_concerts/:country/:time_range_start/:time_range_end')
-  async getConcerts(@Param('country') country: string, @Param('time_range_start') time_range_start: string, @Param('time_range_end') time_range_end: string) {
-    return this.ticketmasterService.get_upcoming_concerts(time_range_start, time_range_end);
+  @Post('new_concerts/:country/:time_range_start/:time_range_end')
+  async upDateConcerts(@Param('country') country: string, @Param('time_range_start') time_range_start: string, @Param('time_range_end') time_range_end: string) {
+    return this.ticketmasterService.update_with_upcoming_concerts(time_range_start, time_range_end);
   }
 
 }
