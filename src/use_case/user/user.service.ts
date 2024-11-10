@@ -60,23 +60,32 @@ export class UserService {
         let closest_vec = null;
         let closest_distance = Infinity;
     
-        for (let i = 0; i < arr.length; i++) {
-            if (arr[i].user_id !== user) {
-                let currentVectorArray = extractVector(arr[i]);
-                let distance = calculateDistance(userVectorArray, currentVectorArray);
-                if (distance < closest_distance) {
-                    closest_distance = distance;
-                    closest_vec = arr[i];
-                }
-            }
-        }
+        // Create an array of objects with user_id and the corresponding distance
+        const distanceArray = arr
+        .filter(item => item.user_id !== user)  // Filter out the current user
+        .map(item => {
+            const currentVectorArray = extractVector(item);
+            const distance = calculateDistance(userVectorArray, currentVectorArray);
+            return { ...item, distance };  // Add the distance to each object
+        });
+
+        // Sort the array by distance (ascending order)
+        distanceArray.sort((a, b) => a.distance - b.distance);
     
-        if (closest_vec) {
-            console.log('Closest Vector:', closest_vec);
-            return await this.databaseService.getUser(closest_vec.user_id);
-        } else {
-            throw new Error('No other users to compare');
+        const k : number = 2;
+        const arrr = [];
+        for (let i = 0; i < k; i++) {
+            const user = await this.databaseService.getUser(distanceArray[i].user_id);
+            arrr.push(user)
         }
+        console.log(arrr);
+        return arrr;
+        // if (closest_vec) {
+        //     console.log('Closest Vector:', closest_vec);
+        //     return await this.databaseService.getUser(closest_vec.user_id);
+        // } else {
+        //     throw new Error('No other users to compare');
+        // }
     }
     async getIsUserFriendsWith(user: string, userToCheck: string) {
         const response = await this.databaseService.getIsUserFriendsWith(user, userToCheck);
