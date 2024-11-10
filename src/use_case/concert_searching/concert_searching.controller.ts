@@ -10,6 +10,8 @@ export class ConcertSearchingController {
     @Post()
     search_concerts(@Body() concertSearchingDto: ConcertSearchingDto) {
         return this.concertSearchingService.search_concerts(concertSearchingDto)
+        // return this.concertSearchingService.createThreadTable();
+
     }
 }
 
