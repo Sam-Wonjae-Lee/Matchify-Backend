@@ -380,5 +380,16 @@ export class SpotifyService implements OnApplicationBootstrap{
     return null;
   }
 
+  public async getRandomPlaylist(userId: string): Promise<{ hasPlaylists: boolean, playlist?: any }> {
+    const playlists = await this.getUserPlaylists(userId);
+
+    if (!playlists || !playlists.items || playlists.items.length === 0) {
+      console.log(`User ${userId} does not have any playlists.`);
+      return { hasPlaylists: false };
+    }
+
+    const randomIndex = Math.floor(Math.random() * playlists.items.length);
+    return { hasPlaylists: true, playlist: playlists.items[randomIndex] };
+  }
 
 }

@@ -10,7 +10,7 @@ export class ConcertSearchingService {
 
 
     // get concerts
-    search_concerts(concertSearchingDto: ConcertSearchingDto) {
+    search_concerts(query: any) {
         const {
             performers,
             concert_name,
@@ -18,7 +18,7 @@ export class ConcertSearchingService {
             date_range_start,
             date_range_end,
             cities,
-        } = concertSearchingDto;
+        } = query;
 
         // get concerts from the database
         const list_of_concerts = this.databaseService.search_concert(concert_name);

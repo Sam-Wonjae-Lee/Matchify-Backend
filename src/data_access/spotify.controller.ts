@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { SpotifyService } from './spotify.service';
 import { access } from 'fs';
 
@@ -70,5 +70,12 @@ export class SpotifyController {
   @Get('user/:id/playback')
   async getCurrentPlaybackState(@Param('id') id: string) {
     return this.spotifyService.getCurrentPlaybackState(id);
+  }
+
+  @Get('user/:userId/random-playlist')
+  async getRandomPlaylist(@Param('userId') userId: string) {
+    const result = await this.spotifyService.getRandomPlaylist(userId);
+
+    return result;
   }
 }

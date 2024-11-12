@@ -129,7 +129,6 @@ describe('DatabaseService (Integration)', () => {
     const result = await pool.query('SELECT * FROM blocks WHERE blocker = $1 AND blocked = $2', ['e', 'f']);
     expect(result.length).toBe(1);
   });
-=======
   it('should flip the dark_mode value in settings (testing settings use case)', async () => {
     const user_id = 'a'; // Set user_id to 'a'
 
@@ -163,7 +162,7 @@ describe('DatabaseService (Integration)', () => {
     const content = 'Hello, world!'; // Set content to 'Hello, world!'
 
     // Call the service method to add a message
-    await service.add_message(messageID, userID, threadID, content);
+    await service.add_message(userID, threadID, content);
 
     // Query the added message
     const result1 = await pool.query('SELECT * FROM message WHERE message_id = $1', [messageID]);
