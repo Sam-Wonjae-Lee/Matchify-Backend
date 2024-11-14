@@ -17,7 +17,7 @@ export class ConcertRecommendationsService {
         const {userID} = concertRecommendationsDto;
 
         const concerts = await this.databaseService.get_concerts(userID);
-        console.log(concerts);
+        // console.log(concerts);
         return concerts;
     }
 }

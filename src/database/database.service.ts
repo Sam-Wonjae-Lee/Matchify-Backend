@@ -961,7 +961,7 @@ async add_message(
     async remove_user_from_concert(userID: string, concertID: string) {
         const client = await this.pool.connect();
         try {
-            const res = await client.query("DELETE FROM user_concert WHERE userID = $1 AND concertID = $2 RETURNING *", [userID, concertID]);
+            const res = await client.query("DELETE FROM user_concert WHERE user_id = $1 AND concert_id = $2 RETURNING *", [userID, concertID]);
             console.log(res.rows);
             return res;
         } 
@@ -988,6 +988,8 @@ async add_message(
             client.release();
         }
     }
+
+
 
     // TODO: still needs alot work here
     async get_concerts(userID: string) {
